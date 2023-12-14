@@ -1,8 +1,9 @@
 library(shiny)
+library(bslib)
 
 shinyApp(
-  
-  ui <- fluidPage(
+
+  ui <- page_fixed(
     sidebarLayout(
       sidebarPanel(
         fileInput("file1", "Choose any File", accept = NULL),
@@ -11,7 +12,7 @@ shinyApp(
           # TODO: add the ability for the user to convert cases-control to 0/1
           # currently the test data is already coded 0=control, 1=case
           condition = "input.idVariable != ''",
-          uiOutput("caseControl")
+          uiOutput("caseControl"),
         ),
         conditionalPanel(
           condition = "input.caseControl != ''",
@@ -45,7 +46,7 @@ shinyApp(
       )
     )
   ),
-  
+
   server <- function(input, output) {
     file <- reactive(input$file1)
     newFile <- reactive({
@@ -61,17 +62,17 @@ shinyApp(
       }
       head(newFile(), n = 20)
     })
-    
+
     output$tableSummaryMessage <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       glue::glue(
         "The table has {nrow(newFile())} rows and {ncol(newFile())} columns."
-        
+
       )
     })
-    
+
     output$tableFootnote <- renderUI({
       if (is.null(file())) {
         return(NULL)
@@ -80,26 +81,30 @@ shinyApp(
         "Displaying only the first 20 rows."
       )
     })
-    
+
     output$idVariable <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       selectInput(
-        "idVariable", "Choose ID variable.", 
+        "idVariable", "Choose ID variable.",
         choices = c("", names(newFile())),
         selected = ""
       )
+      tooltip(
+        bsicons::bs_icon("info-circle", title = "About tooltips"),
+        "Text shown in the tooltip."
+      )
     })
-    
+
     output$caseControl <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       selectInput(
-        "caseControl", "Choose case-control variable.", 
+        "caseControl", "Choose case-control variable.",
         choices = c(
-          "", 
+          "",
           setdiff(
             newFile() |> purrr::keep(is.numeric) |> names(),
             c(input$idVariable)
@@ -107,26 +112,26 @@ shinyApp(
         )
       )
     })
-    
+
     output$numericVariable <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       selectInput(
-        "numericVariable", "Choose numeric matching variable.", 
+        "numericVariable", "Choose numeric matching variable.",
         choices = c(
-          "", 
+          "",
           setdiff(
             newFile() |> purrr::keep(is.numeric) |> names(),
             c(
-              input$idVariable, 
+              input$idVariable,
               input$caseControl
             )
           )
         )
       )
     })
-    
+
     output$numVarRange <- renderUI({
       if (is.null(file()) | is.null(input$numericVariable)) {
         return(NULL)
@@ -136,66 +141,66 @@ shinyApp(
         min = 0, max = 100, step = 1, value = 1
       )
     })
-    
+
     output$explanation <- renderUI({
       if (is.null(file()) | is.null(input$numericVariable)) {
         return(NULL)
       }
       renderText(
-        "Choosing 0 will cause exact matching. If a case has an age of 30, 
-        then it will only be matched to controls that are also 30 years old. 
+        "Choosing 0 will cause exact matching. If a case has an age of 30,
+        then it will only be matched to controls that are also 30 years old.
         If you choose 1, then the case will be matched to controls aged 29 to 31."
       )
     })
-    
+
     output$categoricalVariable <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       selectInput(
-        "categoricalVariable", "Choose categorical matching variable.", 
+        "categoricalVariable", "Choose categorical matching variable.",
         choices = c(
-          "", 
+          "",
           setdiff(
             newFile() |> purrr::keep(is.character) |> names(),
             c(
-              input$idVariable, 
-              input$caseControl, 
+              input$idVariable,
+              input$caseControl,
               input$numericVariable
             )
           )
         )
       )
     })
-    
+
     output$thirdVariable <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       selectInput(
-        "thirdVariable", "Choose categorical matching variable.", 
+        "thirdVariable", "Choose categorical matching variable.",
         choices = c(
-          "leave blank if not needed" = "", 
+          "leave blank if not needed" = "",
           setdiff(
             newFile() |> names(),
             c(
-              input$idVariable, 
-              input$caseControl, 
-              input$numericVariable, 
+              input$idVariable,
+              input$caseControl,
+              input$numericVariable,
               input$categoricalVariable
             )
           )
         )
       )
     })
-    
+
     output$matchButton <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
       actionButton("matchButton", "Match cases to controls")
     })
-    
+
   }
-  
+
 )

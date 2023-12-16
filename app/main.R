@@ -3,7 +3,9 @@ box::use(
   bslib[page_fixed, tooltip],
   glue[glue],
   rio[import],
-  shiny[actionButton, conditionalPanel, div, fileInput, mainPanel, moduleServer, NS, numericInput, selectInput, sidebarLayout, sidebarPanel, reactive, renderTable, renderText, renderUI, tableOutput, tags, uiOutput],
+  shiny[actionButton, conditionalPanel, div, fileInput, mainPanel, moduleServer,
+        NS, numericInput, selectInput, sidebarLayout, sidebarPanel, reactive,
+        req, renderTable, renderText, renderUI, tableOutput, tags, uiOutput],
   utils[head]
 )
 
@@ -26,16 +28,16 @@ ui <- function(id) {
         ),
         conditionalPanel(
           condition = "input.numericVariable != ''",
-          uiOutput(ns("numVarRange"))
-        ),
-        conditionalPanel(
-          condition = "input.numericVariable != ''",
-          uiOutput(ns("explanation"))
-        ),
-        conditionalPanel(
-          condition = "input.numericVariable != ''",
+          uiOutput(ns("numVarRange")),
+          uiOutput(ns("explanation")),
           uiOutput(ns("categoricalVariable"))
         ),
+        # conditionalPanel(
+        #   condition = "input.numericVariable != ''",
+        # ),
+        # conditionalPanel(
+        #   condition = "input.numericVariable != ''",
+        # ),
         conditionalPanel(
           condition = "input.categoricalVariable != ''",
           uiOutput(ns("thirdVariable"))
@@ -59,6 +61,7 @@ ui <- function(id) {
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    ns <- NS(id)
     file <- reactive(input$file1)
     newFile <- reactive({
       if (is.null(file())) {
@@ -98,7 +101,7 @@ server <- function(id) {
         return(NULL)
       }
       selectInput(
-        "idVariable", "Choose ID variable.",
+        ns("idVariable"), "Choose ID variable.",
         choices = c("", names(newFile())),
         selected = ""
       )
@@ -113,7 +116,7 @@ server <- function(id) {
         return(NULL)
       }
       selectInput(
-        "caseControl", "Choose case-control variable.",
+        ns("caseControl"), "Choose case-control variable.",
         choices = c(
           "",
           setdiff(
@@ -129,7 +132,7 @@ server <- function(id) {
         return(NULL)
       }
       selectInput(
-        "numericVariable", "Choose numeric matching variable.",
+        ns("numericVariable"), "Choose numeric matching variable.",
         choices = c(
           "",
           setdiff(
@@ -148,7 +151,7 @@ server <- function(id) {
         return(NULL)
       }
       numericInput(
-        "numVarRange", "Choose matching range of numeric variable.",
+        ns("numVarRange"), "Choose matching range of numeric variable.",
         min = 0, max = 100, step = 1, value = 1
       )
     })
@@ -169,7 +172,7 @@ server <- function(id) {
         return(NULL)
       }
       selectInput(
-        "categoricalVariable", "Choose categorical matching variable.",
+        ns("categoricalVariable"), "Choose categorical matching variable.",
         choices = c(
           "",
           setdiff(
@@ -189,7 +192,7 @@ server <- function(id) {
         return(NULL)
       }
       selectInput(
-        "thirdVariable", "Choose categorical matching variable.",
+        ns("thirdVariable"), "Choose categorical matching variable.",
         choices = c(
           "leave blank if not needed" = "",
           setdiff(

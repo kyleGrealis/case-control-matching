@@ -20,6 +20,10 @@ ui <- function(id) {
         uiOutput(ns("idVariable")),
         conditionalPanel(
           condition = "input.idVariable != ''",
+          ns = ns,
+          # condition = 'ns("idVariable") != ""',
+          # condition = paste0('input[\'', ns('idVariable'), "\'] != ''"),
+          # condition = glue::glue("input[{ns('idVariable')}] != ''"), # works properly
           uiOutput(ns("caseControl"))
         ),
         conditionalPanel(
@@ -100,15 +104,17 @@ server <- function(id) {
       if (is.null(file())) {
         return(NULL)
       }
-      selectInput(
-        ns("idVariable"), "Choose ID variable.",
-        choices = c("", names(newFile())),
-        selected = ""
+      list(
+        bslib::tooltip(
+          bsicons::bs_icon("info-circle", title = "About tooltips"),
+          "Text shown in the tooltip."
+        ),
+        selectInput(
+          ns("idVariable"), "Choose ID variable.",
+          choices = c("", names(newFile())),
+          selected = ""
+        )
       )
-      # bslib::tooltip(
-      #   bsicons::bs_icon("info-circle", title = "About tooltips"),
-      #   "Text shown in the tooltip."
-      # )
     })
 
     output$caseControl <- renderUI({

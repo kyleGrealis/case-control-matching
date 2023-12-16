@@ -86,14 +86,16 @@ shinyApp(
       if (is.null(file())) {
         return(NULL)
       }
-      selectInput(
-        "idVariable", "Choose ID variable.",
-        choices = c("", names(newFile())),
-        selected = ""
-      )
-      tooltip(
-        bsicons::bs_icon("info-circle", title = "About tooltips"),
-        "Text shown in the tooltip."
+      list(
+        tooltip(
+          bsicons::bs_icon("info-circle", title = "About tooltips"),
+          "Text shown in the tooltip."
+        ),
+        selectInput(
+          "idVariable", "Choose ID variable.",
+          choices = c("", names(newFile())),
+          selected = ""
+        )
       )
     })
 

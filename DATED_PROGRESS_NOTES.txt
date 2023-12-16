@@ -1,0 +1,4 @@
+December 16, 2023:
+- adding ns("...") inside of server inputs solved the issue of filtering out previously-selected input options
+- need to solve the problem of the conditional panels now not all being displayed once the dataset is selected
+- consider adding option(s) to view dataset details. e.g.-- `skimr::skim()` or similar function

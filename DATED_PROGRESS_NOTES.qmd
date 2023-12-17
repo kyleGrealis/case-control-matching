@@ -9,3 +9,8 @@ previously-selected input options
 once the dataset is selected
 - consider adding option(s) to view dataset details. e.g.-- `skimr::skim()` or
 similar function
+
+*December 17, 2023:*
+- created 3 new modules: data, data_info, inputs. 
+- what works: new modules
+- what needs fixing: conditional panel logic. wanting a sequential display instead of all options appearing after selecting the dataset

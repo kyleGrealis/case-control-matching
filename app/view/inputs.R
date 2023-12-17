@@ -3,7 +3,8 @@
 box::use(
   bsicons[bs_icon],
   bslib[tooltip],
-  shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS, numericInput, reactive, renderText, renderUI, req, selectInput, tagList, uiOutput],
+  shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS, numericInput, reactive, renderText, renderUI, req, selectInput, tagList, uiOutput,
+        observeEvent],
 )
 
 #' @export
@@ -147,5 +148,18 @@ server <- function(id, newFile) {
         actionButton("matchButton", "Match!")
       )
     })
+
+    # collect all inputs as a reactive to be used in the matching algorithm
+    reactive({
+      list(
+        idVariable          = input$idVariable,
+        caseControl         = input$caseControl,
+        numericVariable     = input$numericVariable,
+        numVarRange         = as.numeric(input$numVarRange),
+        categoricalVariable = input$categoricalVariable,
+        thirdVariable       = input$thirdVariable
+      )
+    })
+    observeEvent(input$categoricalVariable, browser())
   })
 }

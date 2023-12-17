@@ -18,38 +18,11 @@ ui <- function(id) {
       sidebarPanel(
         fileInput(ns("file1"), "Choose any file", accept = NULL),
         uiOutput(ns("idVariable")),
-        conditionalPanel(
-          condition = "input.idVariable != ''",
-          ns = ns,
-          # condition = 'ns("idVariable") != ""',
-          # condition = paste0('input[\'', ns('idVariable'), "\'] != ''"),
-          # condition = glue::glue("input[{ns('idVariable')}] != ''"), # works properly
-          uiOutput(ns("caseControl"))
-        ),
-        conditionalPanel(
-          condition = "input.caseControl != ''",
-          uiOutput(ns("numericVariable"))
-        ),
-        conditionalPanel(
-          condition = "input.numericVariable != ''",
-          uiOutput(ns("numVarRange")),
-          uiOutput(ns("explanation")),
-          uiOutput(ns("categoricalVariable"))
-        ),
-        # conditionalPanel(
-        #   condition = "input.numericVariable != ''",
-        # ),
-        # conditionalPanel(
-        #   condition = "input.numericVariable != ''",
-        # ),
-        conditionalPanel(
-          condition = "input.categoricalVariable != ''",
-          uiOutput(ns("thirdVariable"))
-        ),
-        conditionalPanel(
-          condition = "input.categoricalVariable != ''",
-          uiOutput(ns("matchButton"))
-        )
+        uiOutput(ns("caseControl")),
+        uiOutput(ns("numericVariable")),
+        uiOutput(ns("numRangeCat")),
+        uiOutput(ns("thirdVariable")),
+        uiOutput(ns("matchButton"))
       ), # sidebarPanel
 
       mainPanel(
@@ -121,13 +94,20 @@ server <- function(id) {
       if (is.null(file())) {
         return(NULL)
       }
-      selectInput(
-        ns("caseControl"), "Choose case-control variable.",
-        choices = c(
-          "",
-          setdiff(
-            newFile() |> purrr::keep(is.numeric) |> names(),
-            c(input$idVariable)
+      conditionalPanel(
+        condition = "input.idVariable != ''",
+        # condition = 'ns("idVariable") != ""',
+        # condition = paste0('input[\'', ns('idVariable'), "\'] != ''"),
+        # condition = glue::glue("input[{ns('idVariable')}] != ''"), # works properly
+        # ns = ns,
+        selectInput(
+          ns("caseControl"), "Choose case-control variable.",
+          choices = c(
+            "",
+            setdiff(
+              newFile() |> purrr::keep(is.numeric) |> names(),
+              c(input$idVariable)
+            )
           )
         )
       )
@@ -137,80 +117,77 @@ server <- function(id) {
       if (is.null(file())) {
         return(NULL)
       }
-      selectInput(
-        ns("numericVariable"), "Choose numeric matching variable.",
-        choices = c(
-          "",
-          setdiff(
-            newFile() |> purrr::keep(is.numeric) |> names(),
-            c(
-              input$idVariable,
-              input$caseControl
+      conditionalPanel(
+        condition = "input.caseControl != ''",
+        selectInput(
+          ns("numericVariable"), "Choose numeric matching variable.",
+          choices = c(
+            "",
+            setdiff(
+              newFile() |> purrr::keep(is.numeric) |> names(),
+              c(
+                input$idVariable,
+                input$caseControl
+              )
             )
           )
         )
       )
     })
 
-    output$numVarRange <- renderUI({
+    output$numRangeCat <- renderUI({
       if (is.null(file()) | is.null(input$numericVariable)) {
         return(NULL)
       }
-      numericInput(
-        ns("numVarRange"), "Choose matching range of numeric variable.",
-        min = 0, max = 100, step = 1, value = 1
-      )
-    })
-
-    output$explanation <- renderUI({
-      if (is.null(file()) | is.null(input$numericVariable)) {
-        return(NULL)
-      }
-      renderText(
-        "Choosing 0 will cause exact matching. If a case has an age of 30,
-        then it will only be matched to controls that are also 30 years old.
-        If you choose 1, then the case will be matched to controls aged 29 to 31."
-      )
-    })
-
-    output$categoricalVariable <- renderUI({
-      if (is.null(file())) {
-        return(NULL)
-      }
-      selectInput(
-        ns("categoricalVariable"), "Choose categorical matching variable.",
-        choices = c(
-          "",
-          setdiff(
-            newFile() |> purrr::keep(is.character) |> names(),
-            c(
-              input$idVariable,
-              input$caseControl,
-              input$numericVariable
-            )
-          )
+      conditionalPanel(
+        condition = "input.numericVariable != ''",
+        numericInput(
+          ns("numVarRange"), "Choose matching range of numeric variable.",
+          min = 0, max = 100, step = 1, value = 1
+        ),
+        renderText(
+          "Choosing 0 will cause exact matching. If a case has an age of 30,
+          then it will only be matched to controls that are also 30 years old.
+          If you choose 1, then the case will be matched to controls aged 29 to 31."
+        ),
+        selectInput(
+          ns("categoricalVariable"), "Choose categorical matching variable.",
+          choices = c(
+            "",
+            setdiff(
+              newFile() |> purrr::keep(is.character) |> names(),
+              c(
+                input$idVariable,
+                input$caseControl,
+                input$numericVariable
+              )
+            ) # setiff
+          ) # choices
         )
-      )
+      ) # conditionalPanel
     })
 
     output$thirdVariable <- renderUI({
       if (is.null(file())) {
         return(NULL)
       }
-      selectInput(
-        ns("thirdVariable"), "Choose categorical matching variable.",
-        choices = c(
-          "leave blank if not needed" = "",
-          setdiff(
-            newFile() |> names(),
-            c(
-              input$idVariable,
-              input$caseControl,
-              input$numericVariable,
-              input$categoricalVariable
-            )
-          )
-        )
+      conditionalPanel(
+        condition = "input.categoricalVariable != ''",
+        selectInput(
+          ns("thirdVariable"), "Choose categorical matching variable.",
+          choices = c(
+            "leave blank if not needed" = "",
+            setdiff(
+              newFile() |> names(),
+              c(
+                input$idVariable,
+                input$caseControl,
+                input$numericVariable,
+                input$categoricalVariable
+              )
+            ) # setdiff
+          ) # choices
+        ) # selectInput
       )
     })
 
@@ -218,7 +195,10 @@ server <- function(id) {
       if (is.null(file())) {
         return(NULL)
       }
-      actionButton("matchButton", "Match cases to controls")
+      conditionalPanel(
+        condition = "input.categoricalVariable != ''",
+        actionButton("matchButton", "Match cases to controls")
+      )
     })
   }) # moduleServer
 }

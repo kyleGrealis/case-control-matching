@@ -90,7 +90,7 @@ server <- function(id, newFile) {
       conditionalPanel(
         condition = "input.numericVariable != ''",
         numericInput(
-          ns("numVarRange"), "Choose matching range of numeric variable.",
+          ns("numRange"), "Choose matching range of numeric variable.",
           min = 0, max = 100, step = 1, value = 1
         ),
         renderText(
@@ -155,7 +155,7 @@ server <- function(id, newFile) {
         idVariable          = input$idVariable,
         caseControl         = input$caseControl,
         numericVariable     = input$numericVariable,
-        numVarRange         = as.numeric(input$numVarRange),
+        numRange            = as.numeric(input$numRange),
         categoricalVariable = input$categoricalVariable,
         thirdVariable       = input$thirdVariable
       )

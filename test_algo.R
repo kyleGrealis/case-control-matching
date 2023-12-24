@@ -45,6 +45,8 @@ mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, rati
 # Split the data into cases and controls
 case <- dat |>
   filter({{ caseControl }} == 1) |>
+  # Add case_usage as a column
+  mutate(case_usage = 0) |>
   rename(
     case_id = {{ idVar }},
     case_num_var = {{ numVar }},
@@ -52,6 +54,7 @@ case <- dat |>
     case_third_var = {{ thirdVar }}
   ) |>
   select(-c({{ caseControl }}))
+
 control <- dat |>
   filter({{ caseControl }} == 0) |>
   # Add control_usage as a column
@@ -99,22 +102,30 @@ find_controls <- function(this_case) {
   matched_controls <- possible_controls |>
     slice_sample(n = ratio)
 
+  # Update the case_usage column for the matched controls
+  case$case_usage[case$case_id %in% matched_controls$case_id] <-
+    case$case_usage[case$case_id %in% matched_controls$case_id] + 1
+
   # Update the control_usage column for the matched controls
-  control$control_usage[control$control_id %in% matched_controls$control_id] <- control$control_usage[control$control_id %in% matched_controls$control_id] + 1
+  control$control_usage[control$control_id %in% matched_controls$control_id] <-
+    control$control_usage[control$control_id %in% matched_controls$control_id] + 1
 
   # Combine the case and its matched controls into a single row
-  combined_row <- bind_cols(case_row, matched_controls)
+  combined_row <- bind_cols(case_row, matched_controls) |>
+    select(case_id, case_num_var, case_cat_var, case_third_var, control_id)
 
   return(combined_row)
 }
 
 # works to this point -----------------------------------------------------
 
+# filter the cases from the `dat` dataset that have not met the `ratio`
+# number of matches
 
   # Try to find matches for each case
   iteration <- 0
   while (iteration < 100) {
-    new_matches <- case[[ idVar ]] |> map_dfr(find_controls)
+    new_matches <- case$case_id |> map_dfr(find_controls)
     # browser()
     if (nrow(new_matches) > 0) {
       break
@@ -132,7 +143,7 @@ find_controls <- function(this_case) {
   combined_data <- bind_rows(dat, new_matches)
 
   return(combined_data)
-}
+
 
 
 # testing area ------------------------------------------------------------

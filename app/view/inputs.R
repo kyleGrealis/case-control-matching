@@ -3,8 +3,9 @@
 box::use(
   bsicons[bs_icon],
   bslib[tooltip],
-  shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS, numericInput, reactive, renderText, renderUI, req, selectInput, tagList, uiOutput,
-        observeEvent],
+  shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS,
+        numericInput, reactive, renderText, renderUI, req, selectInput,
+        span, tagList, uiOutput, observeEvent],
 )
 
 #' @export
@@ -30,10 +31,6 @@ server <- function(id, newFile) {
         return(NULL)
       }
       list(
-        bslib::tooltip(
-          bsicons::bs_icon("info-circle", title = "About tooltips"),
-          "Text shown in the tooltip."
-        ),
         selectInput(
           ns("idVariable"), "Choose ID variable.",
           choices = c("", names(newFile())),
@@ -49,7 +46,8 @@ server <- function(id, newFile) {
       conditionalPanel(
         condition = "input.idVariable != ''",
         selectInput(
-          ns("caseControl"), "Choose case-control variable.",
+          ns("caseControl"),
+          span("Choose case-control variable.", bs_icon("info-circle-fill")),
           choices = c(
             "",
             setdiff(
@@ -57,7 +55,11 @@ server <- function(id, newFile) {
               c(input$idVariable)
             )
           )
-        )
+        )|>
+          tooltip(
+            "Be sure that this is coded where 0=\"Control\" and 1=\"Case\"",
+            placement = "top"
+          )
       )
     })
 
@@ -90,14 +92,16 @@ server <- function(id, newFile) {
       conditionalPanel(
         condition = "input.numericVariable != ''",
         numericInput(
-          ns("numRange"), "Choose matching range of numeric variable.",
+          ns("numRange"),
+          span("Choose matching range of numeric variable.", bs_icon("info-circle-fill")),
           min = 0, max = 100, step = 1, value = 1
-        ),
-        renderText(
-          "Choosing 0 will cause exact matching. If a case has an age of 30,
+        ) |>
+          tooltip(
+            "Choosing 0 will cause exact matching. If a case has an age of 30,
           then it will only be matched to controls that are also 30 years old.
-          If you choose 1, then the case will be matched to controls aged 29 to 31."
-        ),
+          If you choose 1, then the case will be matched to controls aged 29 to 31.",
+          placement = "top"
+          ),
         selectInput(
           ns("categoricalVariable"), "Choose categorical matching variable.",
           choices = c(
@@ -124,7 +128,7 @@ server <- function(id, newFile) {
         selectInput(
           ns("thirdVariable"), "Choose categorical matching variable.",
           choices = c(
-            "leave blank if not needed" = "",
+            "leave blank if not needed" = "blank",
             setdiff(
               newFile() |> names(),
               c(

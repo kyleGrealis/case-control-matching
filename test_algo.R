@@ -7,37 +7,67 @@ library(purrr)
 
 # build the function ------------------------------------------------------
 mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio, thirdVar = NULL) {
-
   # Convert the variable names to symbols
   idVar <- rlang::sym(idVar)
   caseControl <- rlang::sym(caseControl)
   catVar <- rlang::sym(catVar)
   numVar <- rlang::sym(numVar)
-  if (!is.null(thirdVar)) {
+  if (thirdVar != "blank") {
     thirdVar <- rlang::sym(thirdVar)
   }
 
   # Split the data into cases and controls
-  case <- dat |>
-    filter({{ caseControl }} == 1) |>
-    rename(
-      case_id = {{ idVar }},
-      case_num_var = {{ numVar }},
-      case_cat_var = {{ catVar }},
-      case_third_var = {{ thirdVar }}
-    ) |>
-    select(-c({{ caseControl }}))
+  if (thirdVar != "blank") {
+    # matching on 3 variables
+    case <- dat |>
+      filter({{ caseControl }} == 1) |>
+      rename(
+        case_id = {{ idVar }},
+        case_num_var = {{ numVar }},
+        case_cat_var = {{ catVar }},
+        case_third_var = {{ thirdVar }}
+      ) |>
+      select(case_id, case_num_var, case_cat_var, case_third_var)
+  } else {
+    # matching on 2 variables
+    case <- dat |>
+      filter({{ caseControl }} == 1) |>
+      rename(
+        case_id = {{ idVar }},
+        case_num_var = {{ numVar }},
+        case_cat_var = {{ catVar }}
+      ) |>
+      select(case_id, case_num_var, case_cat_var)
+  }
 
-  control <- dat |>
-    filter({{ caseControl }} == 0) |>
-    mutate(control_usage = 0) |>
-    rename(
-      control_id = {{ idVar }},
-      control_num_var = {{ numVar }},
-      control_cat_var = {{ catVar }},
-      control_third_var = {{ thirdVar }}
-    ) |>
-    select(-c({{ caseControl }}))
+  if (thirdVar != "blank") {
+    # matching on 3 variables
+    control <- dat |>
+      filter({{ caseControl }} == 0) |>
+      mutate(control_usage = 0) |>
+      rename(
+        control_id = {{ idVar }},
+        control_num_var = {{ numVar }},
+        control_cat_var = {{ catVar }},
+        control_third_var = {{ thirdVar }}
+      ) |>
+      select(
+        control_id, control_num_var, control_cat_var,
+        control_third_var, control_usage
+      )
+  } else {
+    # matching on 2 variables
+    control <- dat |>
+      filter({{ caseControl }} == 0) |>
+      mutate(control_usage = 0) |>
+      rename(
+        control_id = {{ idVar }},
+        control_num_var = {{ numVar }},
+        control_cat_var = {{ catVar }}
+      ) |>
+      select(control_id, control_num_var, control_cat_var, control_usage)
+  }
+
 
   # Set this to be an initial empty value
   combined_rows <- NULL
@@ -51,21 +81,33 @@ mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, rati
     # Access the numVar and catVar columns in the case_row data frame
     numeric_value <- case_row |> pull(case_num_var)
     categorical_value <- case_row |> pull(case_cat_var)
-    if (!is.null(thirdVar)) {
-      third_value <- case_row |> pull(case_third_var)
-    }
 
-    # Check if there are any possible matches for this case
-    possible_controls <- control |>
-      filter(
-        control_cat_var == categorical_value,
-        control_num_var >= numeric_value - numRange,
-        control_num_var <= numeric_value + numRange,
-        control_third_var == third_value,
-        # Only consider controls that have not been used
-        !control_id %in% combined_rows$control_id,
-        control_usage == 0
-      )
+    if (thirdVar != "blank") {
+
+      ## only for matching on 3 variables
+      third_value <- case_row |> pull(case_third_var)
+      possible_controls <- control |>
+        filter(
+          control_cat_var == categorical_value,
+          control_num_var >= numeric_value - numRange,
+          control_num_var <= numeric_value + numRange,
+          control_third_var == third_value,
+          # Only consider controls that have not been used
+          !control_id %in% combined_rows$control_id,
+          control_usage == 0
+        )
+    } else {
+      ## only for matching on 2 variables
+      possible_controls <- control |>
+        filter(
+          control_cat_var == categorical_value,
+          control_num_var >= numeric_value - numRange,
+          control_num_var <= numeric_value + numRange,
+          # Only consider controls that have not been used
+          !control_id %in% combined_rows$control_id,
+          control_usage == 0
+        )
+    }
 
     # If there are no possible matches, return NULL
     if (nrow(possible_controls) == 0) {
@@ -77,11 +119,23 @@ mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, rati
       slice_sample(n = ratio)
 
     # Combine the case and its matched controls into a single row
-    combined_rows <<- bind_cols(case_row, matched_controls) |>
-      select(
-        case_id, case_num_var, case_cat_var, case_third_var,
-        control_id, control_num_var
-      )
+    if (thirdVar != "blank") {
+      # matching on 3 variables
+      combined_rows <<- bind_cols(case_row, matched_controls) |>
+        select(
+          case_id, case_num_var,
+          control_id, control_num_var,
+          case_cat_var, case_third_var
+        )
+    } else {
+      # matching on 2 variables
+      combined_rows <<- bind_cols(case_row, matched_controls) |>
+        select(
+          case_id, case_num_var,
+          control_id, control_num_var,
+          case_cat_var
+        )
+    }
 
     # Update the control usage count
     control <<- control |>
@@ -151,7 +205,7 @@ do_matching <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio
     # provide feedback to the user
     print(
       glue::glue(
-        "\nIteration {i} produced {nrow(matched_data)} rows and {match_results$n_cases} used cases.
+        "\nIteration {i} produced {nrow(matched_data)} rows and {match_results$n_cases} matched cases.
         \n------------------------------------------------------"
       )
     )
@@ -186,10 +240,11 @@ dat <- rio::import("~/Downloads/test_set.sas7bdat")
 idVar <- "participant_id"
 caseControl <- "event"
 numVar <- "age"
-numRange <- 2
+numRange <- 4
 catVar <- "gender"
-ratio <- 2
-thirdVar <- "ethnicity"
+ratio <- 3
+# thirdVar <- "ethnicity"
+thirdVar <- "blank"
 
 
 # use the function --------------------------------------------------------

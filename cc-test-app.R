@@ -1,3 +1,4 @@
+library(dplyr)
 library(shiny)
 library(bslib)
 
@@ -48,6 +49,7 @@ shinyApp(
   ),
 
   server <- function(input, output) {
+
     file <- reactive(input$file1)
     newFile <- reactive({
       if (is.null(file())) {
@@ -56,11 +58,24 @@ shinyApp(
       rio::import(file()$datapath)
     })
 
+    # Custom function to format numbers -- was originally adding decimals to
+    # whole numbers. May need to be re-addressed
+    format_numbers <- function(x) {
+      if (all(x == floor(x))) {
+        return(format(x, nsmall = 0, scientific = FALSE))
+      } else {
+        return(x)
+      }
+    }
     output$contents <- renderTable({
       if (is.null(file())) {
         return(NULL)
       }
-      head(newFile(), n = 20)
+      # Apply the formatting to the numeric columns
+      df <- newFile() |>
+        mutate(across(where(is.numeric), format_numbers))
+
+      head(df, n = 20)
     })
 
     output$tableSummaryMessage <- renderUI({
@@ -86,16 +101,10 @@ shinyApp(
       if (is.null(file())) {
         return(NULL)
       }
-      list(
-        tooltip(
-          bsicons::bs_icon("info-circle", title = "About tooltips"),
-          "Text shown in the tooltip."
-        ),
-        selectInput(
-          "idVariable", "Choose ID variable.",
-          choices = c("", names(newFile())),
-          selected = ""
-        )
+      selectInput(
+        "idVariable", "Choose ID variable.",
+        choices = c("", names(newFile())),
+        selected = ""
       )
     })
 
@@ -104,7 +113,8 @@ shinyApp(
         return(NULL)
       }
       selectInput(
-        "caseControl", "Choose case-control variable.",
+        "caseControl",
+        span("Choose case-control variable.", bs_icon("info-circle-fill")),
         choices = c(
           "",
           setdiff(
@@ -112,7 +122,11 @@ shinyApp(
             c(input$idVariable)
           )
         )
-      )
+      ) |>
+        tooltip(
+          "Be sure that this is coded where 0=\"Control\" and 1=\"Case\"",
+          placement = "top"
+        )
     })
 
     output$numericVariable <- renderUI({
@@ -129,8 +143,8 @@ shinyApp(
               input$idVariable,
               input$caseControl
             )
-          )
-        )
+          ) # setdiff
+        ) # choices
       )
     })
 
@@ -139,20 +153,19 @@ shinyApp(
         return(NULL)
       }
       numericInput(
-        "numVarRange", "Choose matching range of numeric variable.",
+        "numVarRange",
+        span(
+          "Choose matching range of numeric variable.",
+          bs_icon("info-circle-fill")
+        ),
         min = 0, max = 100, step = 1, value = 1
-      )
-    })
-
-    output$explanation <- renderUI({
-      if (is.null(file()) | is.null(input$numericVariable)) {
-        return(NULL)
-      }
-      renderText(
-        "Choosing 0 will cause exact matching. If a case has an age of 30,
-        then it will only be matched to controls that are also 30 years old.
-        If you choose 1, then the case will be matched to controls aged 29 to 31."
-      )
+      ) |>
+        tooltip(
+          "Choosing 0 will cause exact matching. If a case has an age of 30,
+          then it will only be matched to controls that are also 30 years old.
+          If you choose 1, then the case will be matched to controls aged 29 to 31.",
+          placement = "top"
+        )
     })
 
     output$categoricalVariable <- renderUI({
@@ -170,8 +183,8 @@ shinyApp(
               input$caseControl,
               input$numericVariable
             )
-          )
-        )
+          ) # setdiff
+        ) # choices
       )
     })
 
@@ -191,8 +204,8 @@ shinyApp(
               input$numericVariable,
               input$categoricalVariable
             )
-          )
-        )
+          ) # setdiff
+        ) # choices
       )
     })
 

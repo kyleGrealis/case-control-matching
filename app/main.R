@@ -1,6 +1,7 @@
 box::use(
   bslib[page_fixed],
-  shiny[mainPanel, moduleServer, NS, sidebarLayout, sidebarPanel],
+  shiny[mainPanel, moduleServer, NS, reactiveVal,
+        sidebarLayout, sidebarPanel],
 )
 
 box::use(
@@ -30,8 +31,9 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- NS(id)
+    newFile <- reactiveVal()
     newFile <- data$server("data_file")
     data_info$server("info", newFile)
-    inputs$server("inputs", newFile)
+    inputs <- inputs$server("inputs", newFile)
   })
 }

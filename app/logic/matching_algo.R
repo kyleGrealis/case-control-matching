@@ -16,7 +16,6 @@ box::use(
 
 # build the function ------------------------------------------------------
 mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio, thirdVar = NULL) {
-  browser()
   # Convert the variable names to symbols
   idVar <- rlang::sym(idVar)
   caseControl <- rlang::sym(caseControl)
@@ -183,7 +182,7 @@ do_matching <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio
   start_time <- proc.time()
 
   # matching loop
-  for(i in 1:3) {
+  for(i in 1:1) {
 
     # provide feedback to the user
     print(glue::glue("Starting iteration {i}..."))

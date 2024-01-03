@@ -5,7 +5,7 @@ box::use(
   bslib[tooltip],
   shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS,
         numericInput, reactive, renderText, renderUI, selectInput,
-        span, tagList, uiOutput, textOutput],
+        span, tagList, uiOutput, textOutput, observeEvent],
 )
 
 #' @export
@@ -52,14 +52,14 @@ server <- function(id, newFile) {
             setdiff(
               newFile() |> purrr::keep(is.numeric) |> names(),
               c(input$idVariable)
-            )
-          )
-        )|>
+            ) # setdiff
+          ) # choices
+        ) |> # selectInput
           tooltip(
             "Be sure that this is coded where 0=\"Control\" and 1=\"Case\"",
             placement = "top"
           )
-      )
+      ) # conditionalPanel
     })
 
     output$numericVariable <- renderUI({
@@ -79,10 +79,10 @@ server <- function(id, newFile) {
                 input$idVariable,
                 input$caseControl
               )
-            )
-          )
-        )
-      )
+            ) # setdiff
+          ) # choices
+        ) # selectInput
+      ) # conditionalPanel
     })
 
     output$numRangeCat <- renderUI({
@@ -114,9 +114,9 @@ server <- function(id, newFile) {
                 input$caseControl,
                 input$numericVariable
               )
-            ) # setiff
+            ) # setdiff
           ) # choices
-        )
+        ) # selectInput
       ) # conditionalPanel
     })
 
@@ -142,7 +142,7 @@ server <- function(id, newFile) {
             ) # setdiff
           ) # choices
         ) # selectInput
-      )
+      ) # conditionalPanel
     })
 
     output$matchButton <- renderUI({
@@ -157,15 +157,17 @@ server <- function(id, newFile) {
     })
 
     # collect all inputs as a reactive to be used in the matching algorithm
-    # reactive({
-    #   list(
-    #     idVariable          = input$idVariable,
-    #     caseControl         = input$caseControl,
-    #     numericVariable     = input$numericVariable,
-    #     numRange            = as.numeric(input$numRange),
-    #     categoricalVariable = input$categoricalVariable,
-    #     thirdVariable       = input$thirdVariable
-    #   )
-    # })
+    reactive({
+      list(
+        idVariable          = input$idVariable,
+        caseControl         = input$caseControl,
+        numericVariable     = input$numericVariable,
+        numRange            = as.numeric(input$numRange),
+        categoricalVariable = input$categoricalVariable,
+        thirdVariable       = input$thirdVariable
+      )
+    })
+
+    # observeEvent(input$categoricalVariable, browser())
   })
 }

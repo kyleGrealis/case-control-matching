@@ -4,39 +4,27 @@ box::use(
   bsicons[bs_icon],
   bslib[tooltip],
   shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS,
-        numericInput, reactive, renderText, renderUI, req, selectInput,
-        span, tagList, uiOutput, observeEvent, textOutput, reactiveVal,
-        validate, need],
-  shinyjs[useShinyjs],
+        numericInput, reactive, renderText, renderUI, selectInput,
+        span, tagList, uiOutput, textOutput],
 )
-
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("idVariable")),
-    conditionalPanel(
-      condition = "input.idVariable === ''",
-      ns = ns,
-      "This is a test and should show once the data is loaded." # not showing
-    ),
-    conditionalPanel(
-      condition = "input.idVariable !== ''",
-      ns = ns,
-      uiOutput(ns("caseControl")) # currently displays after data is loaded
-    )
+    uiOutput(ns("caseControl")),
+    uiOutput(ns("numericVariable")),
+    uiOutput(ns("numRangeCat")),
+    uiOutput(ns("thirdVariable")),
+    uiOutput(ns("matchButton"))
   )
 }
 
 #' @export
 server <- function(id, newFile) {
-  # moduleServer(id, function(input, output, server) {
-  # change from server -> session per SO answer
   moduleServer(id, function(input, output, session) {
-    message("Module ", id, " has been activated.")
-    # ns <- NS(id)
-    ns <- session$ns  # suggestion from SO
+    ns <- session$ns
 
     output$idVariable <- renderUI({
       if (is.null(newFile())) {
@@ -53,6 +41,9 @@ server <- function(id, newFile) {
       if (is.null(newFile())) {
         return(NULL)
       }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.idVariable !== ''",
         selectInput(
           ns("caseControl"),
           span("Choose case-control variable.", bs_icon("info-circle-fill")),
@@ -68,8 +59,113 @@ server <- function(id, newFile) {
             "Be sure that this is coded where 0=\"Control\" and 1=\"Case\"",
             placement = "top"
           )
-      # }
+      )
     })
 
+    output$numericVariable <- renderUI({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.caseControl !== ''",
+        selectInput(
+          ns("numericVariable"), "Choose numeric matching variable.",
+          choices = c(
+            "",
+            setdiff(
+              newFile() |> purrr::keep(is.numeric) |> names(),
+              c(
+                input$idVariable,
+                input$caseControl
+              )
+            )
+          )
+        )
+      )
+    })
+
+    output$numRangeCat <- renderUI({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.numericVariable !== ''",
+        numericInput(
+          ns("numRange"),
+          span("Choose matching range of numeric variable.", bs_icon("info-circle-fill")),
+          min = 0, max = 100, step = 1, value = 1
+        ) |>
+          tooltip(
+            "Choosing 0 will cause exact matching. If a case has an age of 30,
+          then it will only be matched to controls that are also 30 years old.
+          If you choose 1, then the case will be matched to controls aged 29 to 31.",
+          placement = "top"
+          ),
+        selectInput(
+          ns("categoricalVariable"), "Choose categorical matching variable.",
+          choices = c(
+            "",
+            setdiff(
+              newFile() |> purrr::keep(is.character) |> names(),
+              c(
+                input$idVariable,
+                input$caseControl,
+                input$numericVariable
+              )
+            ) # setiff
+          ) # choices
+        )
+      ) # conditionalPanel
+    })
+
+    output$thirdVariable <- renderUI({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.categoricalVariable !== ''",
+        selectInput(
+          ns("thirdVariable"), "Choose categorical matching variable.",
+          choices = c(
+            "leave blank if not needed" = "blank",
+            setdiff(
+              newFile() |> names(),
+              c(
+                input$idVariable,
+                input$caseControl,
+                input$numericVariable,
+                input$categoricalVariable
+              )
+            ) # setdiff
+          ) # choices
+        ) # selectInput
+      )
+    })
+
+    output$matchButton <- renderUI({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.categoricalVariable !== ''",
+        actionButton("matchButton", "Match!")
+      )
+    })
+
+    # collect all inputs as a reactive to be used in the matching algorithm
+    # reactive({
+    #   list(
+    #     idVariable          = input$idVariable,
+    #     caseControl         = input$caseControl,
+    #     numericVariable     = input$numericVariable,
+    #     numRange            = as.numeric(input$numRange),
+    #     categoricalVariable = input$categoricalVariable,
+    #     thirdVariable       = input$thirdVariable
+    #   )
+    # })
   })
 }

@@ -6,15 +6,17 @@
 
 box::use(
   dplyr[bind_cols, case_when, filter, mutate, n_distinct, pull, rename,
-        select, slice, summarize],
+        select, slice_sample, summarize],
   glue[glue],
   purrr[map_dfr],
-  rlang[sym]
+  rlang[sym],
+  utils[head]
 )
 
 
 # build the function ------------------------------------------------------
 mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio, thirdVar = NULL) {
+  browser()
   # Convert the variable names to symbols
   idVar <- rlang::sym(idVar)
   caseControl <- rlang::sym(caseControl)
@@ -172,6 +174,9 @@ mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, rati
 # use matching algorithm with loop ----------------------------------------
 do_matching <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio, thirdVar = NULL) {
 
+  # added from Copilot
+  dat <- dat()
+
   best_matched_data <- NULL
 
   # start computation timer
@@ -186,7 +191,7 @@ do_matching <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio
     # get the results of the best iteration
     if (!is.null(best_matched_data)) {
       best_match_results <- best_matched_data |>
-        summarise(
+        summarize(
           n_cases = n_distinct(case_id),
           n_controls = n_distinct(control_id)
         )
@@ -206,7 +211,7 @@ do_matching <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio
 
     # count the number of unique cases and controls
     match_results <- matched_data |>
-      summarise(
+      summarize(
         n_cases = n_distinct(case_id),
         n_controls = n_distinct(control_id)
       )

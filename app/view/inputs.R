@@ -5,7 +5,7 @@ box::use(
   bslib[tooltip],
   shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS,
         numericInput, reactive, renderText, renderUI, selectInput,
-        span, tagList, uiOutput, textOutput, observeEvent],
+        span, tagList, uiOutput, observeEvent],
 )
 
 #' @export
@@ -15,7 +15,9 @@ ui <- function(id) {
     uiOutput(ns("idVariable")),
     uiOutput(ns("caseControl")),
     uiOutput(ns("numericVariable")),
-    uiOutput(ns("numRangeCat")),
+    uiOutput(ns("numRange")),
+    uiOutput(ns("categoricalVariable")),
+    uiOutput(ns("ratio")),
     uiOutput(ns("thirdVariable")),
     uiOutput(ns("matchButton"))
   )
@@ -85,7 +87,7 @@ server <- function(id, newFile) {
       ) # conditionalPanel
     })
 
-    output$numRangeCat <- renderUI({
+    output$numRange <- renderUI({
       if (is.null(newFile())) {
         return(NULL)
       }
@@ -94,15 +96,28 @@ server <- function(id, newFile) {
         condition = "input.numericVariable !== ''",
         numericInput(
           ns("numRange"),
-          span("Choose matching range of numeric variable.", bs_icon("info-circle-fill")),
-          min = 0, max = 100, step = 1, value = 1
-        ) |>
-          tooltip(
-            "Choosing 0 will cause exact matching. If a case has an age of 30,
-          then it will only be matched to controls that are also 30 years old.
-          If you choose 1, then the case will be matched to controls aged 29 to 31.",
-          placement = "top"
+          span(
+            "Choose matching range of numeric variable.",
+            bs_icon("info-circle-fill")
           ),
+          min = 0, max = 100, step = 1, value = NA
+        ) |>
+        tooltip(
+          "A value of \"0\" will perform exact matching (example: the case &
+          control(s) are the same age). A value of \"1\" will perform matching
+          based on a range (case age 40 and eligible controls aged 39-41).",
+          placement = "top"
+        )
+      ) # conditionalPanel
+    })
+
+    output$categoricalVariable <- renderUI({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.numRange !== null",
         selectInput(
           ns("categoricalVariable"), "Choose categorical matching variable.",
           choices = c(
@@ -120,13 +135,37 @@ server <- function(id, newFile) {
       ) # conditionalPanel
     })
 
-    output$thirdVariable <- renderUI({
+    output$ratio <- renderUI({
       if (is.null(newFile())) {
         return(NULL)
       }
       conditionalPanel(
         ns = ns,
         condition = "input.categoricalVariable !== ''",
+        numericInput(
+          ns("ratio"),
+          span(
+            "Choose matching ratio.",
+            bs_icon("info-circle-fill")
+          ),
+          min = 1, max = 10, step = 1, value = NA
+        ) |>
+        tooltip(
+          "A value of \"1\" will attempt 1:1 matching (one case is
+          matched to one control). A value of \"2\" will perform 1:2 matching
+          (matching one case to two controls).",
+          placement = "top"
+        )
+      ) # conditionalPanel
+    })
+
+    output$thirdVariable <- renderUI({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      conditionalPanel(
+        ns = ns,
+        condition = "input.ratio !== null",
         selectInput(
           ns("thirdVariable"), "Choose categorical matching variable.",
           choices = c(
@@ -152,7 +191,7 @@ server <- function(id, newFile) {
       conditionalPanel(
         ns = ns,
         condition = "input.categoricalVariable !== ''",
-        actionButton("matchButton", "Match!")
+        actionButton(ns("matchButton"), "Match!")
       )
     })
 
@@ -164,10 +203,11 @@ server <- function(id, newFile) {
         numericVariable     = input$numericVariable,
         numRange            = as.numeric(input$numRange),
         categoricalVariable = input$categoricalVariable,
-        thirdVariable       = input$thirdVariable
+        ratio               = input$ratio,
+        thirdVariable       = input$thirdVariable,
+        matchButton         = input$matchButton
       )
     })
 
-    # observeEvent(input$categoricalVariable, browser())
   })
 }

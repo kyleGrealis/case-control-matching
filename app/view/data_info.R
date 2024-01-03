@@ -48,7 +48,7 @@ server <- function(id, newFile) {
         return(NULL)
       }
       glue::glue(
-        "The table has {nrow(newFile())} rows and {ncol(newFile())} columns."
+        "The dataset contains {nrow(newFile())} rows and {ncol(newFile())} columns."
       )
     })
 
@@ -57,7 +57,7 @@ server <- function(id, newFile) {
         return(NULL)
       }
       glue::glue(
-        "Displaying only the first 20 rows."
+        "Displaying the first 20 rows."
       )
     })
 

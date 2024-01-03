@@ -190,7 +190,7 @@ server <- function(id, newFile) {
       }
       conditionalPanel(
         ns = ns,
-        condition = "input.categoricalVariable !== ''",
+        condition = "input.ratio !== null",
         actionButton(ns("matchButton"), "Match!")
       )
     })

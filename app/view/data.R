@@ -12,7 +12,7 @@ box::use(
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-  fileInput(ns("file1"), "Choose any file", accept = NULL)
+  fileInput(ns("file1"), "Choose data to import.", accept = NULL)
 }
 
 #' @export

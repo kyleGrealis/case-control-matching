@@ -10,8 +10,6 @@ shinyApp(
         fileInput("file1", "Choose any File", accept = NULL),
         uiOutput("idVariable"),
         conditionalPanel(
-          # TODO: add the ability for the user to convert cases-control to 0/1
-          # currently the test data is already coded 0=control, 1=case
           condition = "input.idVariable != ''",
           uiOutput("caseControl"),
         ),

@@ -194,31 +194,16 @@ server <- function(id, newFile) {
         ns = ns,
         condition = "input.ratio !== null",
         actionButton(ns("matchButton"), "Match!")
-      )
+      ) |>
+        tooltip(
+          "Currently can only be clicked once!",
+          placement = "top"
+        )
     })
 
-    # # collect all inputs as a reactive to be used in the matching algorithm
-    # reactive({
-    #   list(
-    #     idVariable          = input$idVariable,
-    #     caseControl         = input$caseControl,
-    #     numericVariable     = input$numericVariable,
-    #     numRange            = as.numeric(input$numRange),
-    #     categoricalVariable = input$categoricalVariable,
-    #     ratio               = input$ratio,
-    #     thirdVariable       = input$thirdVariable,
-    #     matchButton         = input$matchButton
-    #   )
-    # })
-
+    # This section enables the match button to work only once----
     # Create a reactive value to store the button click status
     buttonClicked <- reactiveVal(FALSE)
-
-    # Use conditionalPanel to hide the button after it's clicked
-    conditionalPanel(
-      condition = "output.buttonClicked == false",
-      actionButton(ns("matchButton"), "Match")
-    )
 
     observeEvent(input$matchButton, {
       # Update the reactive value when the button is clicked

@@ -3,15 +3,17 @@
 box::use(
   bsicons[bs_icon],
   bslib[tooltip],
-  shiny[actionButton, conditionalPanel, fileInput, moduleServer, NS,
-        numericInput, reactive, renderText, renderUI, selectInput,
+  shiny[actionButton, conditionalPanel, fileInput, isolate, moduleServer, NS,
+        numericInput, reactive, reactiveVal, renderText, renderUI, selectInput,
         span, tagList, uiOutput, observeEvent],
+  shinyjs[disable, useShinyjs],
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
+    useShinyjs(),
     uiOutput(ns("idVariable")),
     uiOutput(ns("caseControl")),
     uiOutput(ns("numericVariable")),
@@ -195,7 +197,37 @@ server <- function(id, newFile) {
       )
     })
 
-    # collect all inputs as a reactive to be used in the matching algorithm
+    # # collect all inputs as a reactive to be used in the matching algorithm
+    # reactive({
+    #   list(
+    #     idVariable          = input$idVariable,
+    #     caseControl         = input$caseControl,
+    #     numericVariable     = input$numericVariable,
+    #     numRange            = as.numeric(input$numRange),
+    #     categoricalVariable = input$categoricalVariable,
+    #     ratio               = input$ratio,
+    #     thirdVariable       = input$thirdVariable,
+    #     matchButton         = input$matchButton
+    #   )
+    # })
+
+    # Create a reactive value to store the button click status
+    buttonClicked <- reactiveVal(FALSE)
+
+    # Use conditionalPanel to hide the button after it's clicked
+    conditionalPanel(
+      condition = "output.buttonClicked == false",
+      actionButton(ns("matchButton"), "Match")
+    )
+
+    observeEvent(input$matchButton, {
+      # Update the reactive value when the button is clicked
+      buttonClicked(TRUE)
+    })
+
+    output$buttonClicked <- reactive({ buttonClicked() })
+
+    # Return the reactive value with the inputs
     reactive({
       list(
         idVariable          = input$idVariable,
@@ -205,7 +237,7 @@ server <- function(id, newFile) {
         categoricalVariable = input$categoricalVariable,
         ratio               = input$ratio,
         thirdVariable       = input$thirdVariable,
-        matchButton         = input$matchButton
+        matchButton         = buttonClicked()
       )
     })
 

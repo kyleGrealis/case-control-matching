@@ -1,6 +1,6 @@
 box::use(
   bslib[page_fixed],
-  shiny[mainPanel, moduleServer, NS, reactiveVal,
+  shiny[mainPanel, moduleServer, NS, observeEvent, observe, reactiveVal,
         sidebarLayout, sidebarPanel],
 )
 
@@ -19,6 +19,7 @@ ui <- function(id) {
       sidebarPanel(
         data$ui(ns("data_file")),
         inputs$ui(ns("inputs"))
+
       ),
       mainPanel(
         data_info$ui(ns("info")),
@@ -35,5 +36,38 @@ server <- function(id) {
     newFile <- data$server("data_file")
     data_info$server("info", newFile)
     inputs <- inputs$server("inputs", newFile)
+
+    # # Create a reactive value to store the button click status
+    # buttonClicked <- reactiveVal(FALSE)
+    #
+    # observeEvent(inputs()$matchButton, {
+    #   # Update the reactive value when the button is clicked
+    #   buttonClicked(TRUE)
+    # })
+    #
+    # observe({
+    #   if (buttonClicked()) {
+    #     matching_algo$do_matching(
+    #       newFile,
+    #       inputs()$idVariable, inputs()$caseControl,
+    #       inputs()$numericVariable, inputs()$numRange,
+    #       inputs()$categoricalVariable, inputs()$ratio,
+    #       inputs()$thirdVariable
+    #     )
+    #   }
+    # })
+
+    observe({
+      if (inputs()$matchButton) {
+        matching_algo$do_matching(
+          newFile,
+          inputs()$idVariable, inputs()$caseControl,
+          inputs()$numericVariable, inputs()$numRange,
+          inputs()$categoricalVariable, inputs()$ratio,
+          inputs()$thirdVariable
+        )
+      }
+    })
+
   })
 }

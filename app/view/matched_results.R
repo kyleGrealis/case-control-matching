@@ -5,6 +5,7 @@
 
 box::use(
   dplyr[across, mutate, where],
+  glue[glue],
   shiny[moduleServer, NS, renderTable, req, tableOutput, tagList,
         renderText, textOutput],
   utils[head]
@@ -32,7 +33,9 @@ server <- function(id, results) {
       if (is.null(results())) {
         return(NULL)
       }
-      "Displaying the first 20 rows of successful matches."
+      glue::glue(
+        "Displaying the first 20 rows of {nrow(results())} successful matches."
+      )
     })
 
     output$matched <- renderTable({

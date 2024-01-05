@@ -1,19 +1,19 @@
 box::use(
   bslib[bs_theme, nav_item, nav_menu, nav_panel, nav_spacer, navset_card_tab,
         page_fillable],
-  dplyr[across, mutate, where],
   shiny[icon, mainPanel, moduleServer, NS, observeEvent, observe, reactiveVal,
         sidebarLayout, sidebarPanel, tags, a, div, uiOutput, renderUI, req,
         reactive, renderTable, tableOutput],
 )
 
 box::use(
-  app/logic/functions[format_numbers],
   app/view/algo,
   app/view/data,
   app/view/data_info,
   app/view/inputs,
   app/view/footer,
+  app/view/matched_results,
+  app/view/unmatched_results
 )
 
 link_shiny <- tags$a(
@@ -46,16 +46,15 @@ ui <- function(id) {
               navset_card_tab(
                 nav_panel(
                   "Matched Data",
-                  tableOutput(ns("algo"))
-                  # "matched results will go here"
+                  matched_results$ui(ns("matched"))
                 ),
                 nav_panel(
                   "Cases",
-                  "this will be the unmatched Cases"
+                  unmatched_results$ui(ns("cases"))
                 ),
                 nav_panel(
                   "Controls",
-                  "this will be the unmatched Controls"
+                  unmatched_results$ui(ns("controls"))
                 )
               )
             ), # nav_panel
@@ -80,20 +79,10 @@ server <- function(id) {
     newFile <- data$server("data_file")
     data_info$server("info", newFile)
     inputs <- inputs$server("inputs", newFile)
-
-    # Get results from algo$server
     results <- algo$server("algo", newFile, inputs)
-
-    output$algo <- renderTable({
-      # Use req to wait for results to be available
-      req(results())
-
-      if (is.null(results())) {
-        return(NULL)
-      }
-      results() |>
-        mutate(across(where(is.numeric), format_numbers))
-    })
+    matched_results$server("matched", results)
+    unmatched_results$server("cases", newFile, inputs, results, "cases")
+    unmatched_results$server("controls", newFile, inputs, results, "controls")
   })
 }
 

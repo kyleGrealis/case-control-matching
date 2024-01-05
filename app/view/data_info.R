@@ -4,7 +4,7 @@ box::use(
   dplyr[across, mutate, where],
   glue[glue],
   shiny[moduleServer, NS, renderTable, renderUI, tableOutput, tagList, uiOutput],
-  stringr[str_to_title],
+  # stringr[str_to_title],
   utils[head]
 )
 
@@ -36,7 +36,7 @@ server <- function(id, newFile) {
         mutate(across(where(is.numeric), format_numbers))
 
       # Make all variable names title case
-      colnames(df) <- stringr::str_to_title(colnames(df))
+      # colnames(df) <- stringr::str_to_title(colnames(df))
 
       head(df, n = 20)
     })

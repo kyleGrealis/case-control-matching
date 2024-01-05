@@ -196,7 +196,7 @@ server <- function(id, newFile) {
         actionButton(ns("matchButton"), "Match!")
       ) |>
         tooltip(
-          "Currently can only be clicked once!",
+          "Click ONLY once!",
           placement = "top"
         )
     })

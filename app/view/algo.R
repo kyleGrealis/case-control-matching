@@ -15,6 +15,8 @@ box::use(
 server <- function(id, newFile, inputs) {
   moduleServer(id, function(input, output, session) {
 
+    results <- reactiveVal()
+
     observeEvent(inputs()$matchButton, {
       results(
         matching_algo$do_matching(

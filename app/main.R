@@ -40,19 +40,27 @@ ui <- function(id) {
         ),
         mainPanel(
           navset_card_tab(
-            nav_panel("Data", data_info$ui(ns("info"))),
             nav_panel(
+              id = "data",
+              "Data",
+              data_info$ui(ns("info"))
+            ),
+            nav_panel(
+              id = "results",
               "Results",
               navset_card_tab(
                 nav_panel(
+                  id = "matched_data",
                   "Matched Data",
                   matched_results$ui(ns("matched"))
                 ),
                 nav_panel(
+                  id = "cases",
                   "Cases",
                   unmatched_results$ui(ns("cases"))
                 ),
                 nav_panel(
+                  id = "controls",
                   "Controls",
                   unmatched_results$ui(ns("controls"))
                 )

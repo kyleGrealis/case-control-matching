@@ -9,7 +9,7 @@ box::use(
   purrr[map_dfr],
   rlang[sym],
   shiny[isolate, moduleServer, NS, observeEvent, reactiveVal, reactiveValues,
-        renderText, tagList, verbatimTextOutput],
+        renderText, showNotification, tagList, verbatimTextOutput],
   utils[head],
 )
 
@@ -36,6 +36,12 @@ server <- function(id, newFile, inputs) {
     rv <- reactiveValues(data = "")
 
     observeEvent(inputs()$matchButton, {
+
+      showNotification(
+        "Beginning iterative matching process...
+    The algorithm will retain the iteration that produces the greatest number of matched cases.",
+    type = "message"
+      )
 
       rv$data <- paste(
         rv$data, glue::glue(

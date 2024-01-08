@@ -1,9 +1,8 @@
 box::use(
   bslib[bs_theme, nav_item, nav_menu, nav_panel, nav_spacer, navset_card_tab,
         page_fillable],
-  shiny[icon, mainPanel, moduleServer, NS, observeEvent, observe, reactiveVal,
-        sidebarLayout, sidebarPanel, tags, a, div, uiOutput, renderUI, req,
-        reactive, renderTable, tableOutput],
+  shiny[a, div, icon, mainPanel, moduleServer, NS, sidebarLayout, sidebarPanel,
+        tags,],
 )
 
 box::use(
@@ -64,7 +63,7 @@ ui <- function(id) {
                   "Controls",
                   unmatched_results$ui(ns("controls"))
                 )
-              )
+              ), # navset_card_tab
             ), # nav_panel
             nav_spacer(),
             nav_menu(
@@ -84,34 +83,15 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
     newFile <- data$server("data_file")
     data_info$server("info", newFile)
     inputs <- inputs$server("inputs", newFile)
     results <- algo$server("algo", newFile, inputs)
+
     matched_results$server("matched", results)
     unmatched_results$server("cases", newFile, inputs, results, "cases")
     unmatched_results$server("controls", newFile, inputs, results, "controls")
+
   })
 }
-
-
-
-# # Create a reactive value to store the button click status
-# buttonClicked <- reactiveVal(FALSE)
-#
-# observeEvent(inputs()$matchButton, {
-#   # Update the reactive value when the button is clicked
-#   buttonClicked(TRUE)
-# })
-#
-# observe({
-#   if (buttonClicked()) {
-#     matching_algo$do_matching(
-#       newFile,
-#       inputs()$idVariable, inputs()$caseControl,
-#       inputs()$numericVariable, inputs()$numRange,
-#       inputs()$categoricalVariable, inputs()$ratio,
-#       inputs()$thirdVariable
-#     )
-#   }
-# })

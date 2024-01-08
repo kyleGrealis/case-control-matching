@@ -3,8 +3,8 @@
 box::use(
   dplyr[across, mutate, where],
   glue[glue],
-  shiny[moduleServer, NS, renderTable, renderUI, tableOutput, tagList, uiOutput],
-  # stringr[str_to_title],
+  shiny[moduleServer, NS, renderTable, renderUI, tableOutput, tagList, uiOutput,
+        withProgress],
   utils[head]
 )
 
@@ -31,14 +31,17 @@ server <- function(id, newFile) {
         return(NULL)
       }
 
-      # Apply the formatting to the numeric columns
-      df <- newFile() |>
-        mutate(across(where(is.numeric), format_numbers))
+      withProgress(
+        message = "Uploading data", {
+          # Create pause to see message
+          Sys.sleep(2)
 
-      # Make all variable names title case
-      # colnames(df) <- stringr::str_to_title(colnames(df))
-
-      head(df, n = 20)
+          # Apply the formatting to the numeric columns and display head
+          df <- newFile() |>
+            mutate(across(where(is.numeric), format_numbers)) |>
+            head(20)
+        }
+      )
     })
 
     output$tableSummaryMessage <- renderUI({
@@ -46,7 +49,8 @@ server <- function(id, newFile) {
         return(NULL)
       }
       glue::glue(
-        "The dataset contains {nrow(newFile())} rows and {ncol(newFile())} columns."
+        "The dataset contains {nrow(newFile())} participants
+        and {ncol(newFile())} variable columns."
       )
     })
 
@@ -55,7 +59,7 @@ server <- function(id, newFile) {
         return(NULL)
       }
       glue::glue(
-        "Displaying the first 20 rows."
+        "Displaying the first 20 participants."
       )
     })
 

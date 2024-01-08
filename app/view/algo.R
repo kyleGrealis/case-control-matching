@@ -31,10 +31,19 @@ server <- function(id, newFile, inputs) {
     ns <- session$ns
 
     best_matched_data <- reactiveVal()
+
     # for text output
     rv <- reactiveValues(data = "")
 
     observeEvent(inputs()$matchButton, {
+
+      rv$data <- paste(
+        rv$data, glue::glue(
+          "Beginning iterative matching process...
+          The algorithm will retain the iteration that produces the greatest number of matched cases.
+          ------------------------------------------------------\n"
+        ), sep = "\n"
+      )
 
       best_matched_data(NULL)
 
@@ -42,10 +51,13 @@ server <- function(id, newFile, inputs) {
       start_time <- proc.time()
 
       # matching loop
-      for(i in 1:1) {
+      for(i in 1:3) {
 
         # provide feedback to the user
         print(glue::glue("Starting iteration {i}..."))
+        rv$data <- paste(
+          rv$data, glue::glue("Starting iteration {i}..."), sep = "\n"
+        )
 
         # get the results of the best iteration
         if (!is.null(best_matched_data())) {
@@ -75,10 +87,15 @@ server <- function(id, newFile, inputs) {
         # provide feedback to the user
         print(
           glue::glue(
-            "\nIteration {i} produced {nrow(matched_data)} rows and
-            {match_results$n_cases} matched cases.
+            "\nIteration {i} produced {nrow(matched_data)} rows and {match_results$n_cases} matched cases.
             \n------------------------------------------------------"
           )
+        )
+        rv$data <- paste(
+          rv$data, glue::glue(
+            "\nIteration {i} produced {nrow(matched_data)} rows and {match_results$n_cases} matched cases.
+            \n------------------------------------------------------"
+          ), sep = "\n"
         )
 
         # compare the results to the best results
@@ -99,26 +116,12 @@ server <- function(id, newFile, inputs) {
       end_time <- proc.time()
       comp_time <- end_time - start_time
       print(glue::glue("\n\nTotal matching time: {round(comp_time[3], 2)} seconds"))
+      rv$data <- paste(
+        rv$data, glue::glue(
+          "\n\nTotal matching time: {round(comp_time[3], 2)} seconds"
+        ), sep = "\n"
+      )
 
-      # return(best_matched_data)
-
-      # for (i in 1:1) {
-      #   # Provide feedback to the user
-      #   new_line <- glue::glue("Starting iteration {i}...")
-      #   message(glue::glue("Starting iteration {i}..."))
-      #
-      #   # run the matching algorithm
-      #   results(
-      #     matching_algo$mitter_match(
-      #       newFile,
-      #       inputs()$idVariable, inputs()$caseControl,
-      #       inputs()$numericVariable, inputs()$numRange,
-      #       inputs()$categoricalVariable, inputs()$ratio,
-      #       inputs()$thirdVariable
-      #     )
-      #   )
-      #
-      #   message(glue::glue("Ending iteration {i}"))
       #   # Provide feedback to the user
       #   result_line <- glue::glue(
       #     "\nIteration {i} produced {i} rows and XYZ matched cases.
@@ -132,9 +135,9 @@ server <- function(id, newFile, inputs) {
 
     }, once = TRUE)
 
-    # output$iteration_results <- renderText({
-    #   rv$data
-    # })
+    output$iteration_results <- renderText({
+      rv$data
+    })
 
     # return(results)
     return(best_matched_data)

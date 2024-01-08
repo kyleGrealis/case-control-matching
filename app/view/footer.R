@@ -11,7 +11,7 @@ footer <- Stack(
     variant = "medium",
     em("Written & developed by: Kyle Grealis "),
     a(icon("github"),
-      href = "https://github.com/kyleGrealis/category5",
+      href = "https://github.com/kyleGrealis/case-control-matching",
       target = "_blank", style = "color: black;"
     ),
     block=TRUE

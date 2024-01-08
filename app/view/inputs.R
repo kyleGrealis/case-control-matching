@@ -201,17 +201,6 @@ server <- function(id, newFile) {
         )
     })
 
-    # This section enables the match button to work only once----
-    # Create a reactive value to store the button click status
-    buttonClicked <- reactiveVal(FALSE)
-
-    observeEvent(input$matchButton, {
-      # Update the reactive value when the button is clicked
-      buttonClicked(TRUE)
-    })
-
-    output$buttonClicked <- reactive({ buttonClicked() })
-
     # Return the reactive value with the inputs
     reactive({
       list(
@@ -222,7 +211,7 @@ server <- function(id, newFile) {
         categoricalVariable = input$categoricalVariable,
         ratio               = input$ratio,
         thirdVariable       = input$thirdVariable,
-        matchButton         = buttonClicked()
+        matchButton         = input$matchButton
       )
     })
 

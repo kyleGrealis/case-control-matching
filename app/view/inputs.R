@@ -194,11 +194,7 @@ server <- function(id, newFile) {
         ns = ns,
         condition = "input.ratio !== null",
         actionButton(ns("matchButton"), "Match!")
-      ) |>
-        tooltip(
-          "Click ONLY once!",
-          placement = "top"
-        )
+      )
     })
 
     # Return the reactive value with the inputs

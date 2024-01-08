@@ -31,17 +31,17 @@ server <- function(id, newFile) {
         return(NULL)
       }
 
-      withProgress(
-        message = "Uploading data", {
-          # Create pause to see message
-          Sys.sleep(2)
+      # withProgress(
+      #   message = "Uploading data", {
+      #     # Create pause to see message
+      #     Sys.sleep(2)
 
           # Apply the formatting to the numeric columns and display head
           df <- newFile() |>
             mutate(across(where(is.numeric), format_numbers)) |>
             head(20)
-        }
-      )
+      #   }
+      # )
     })
 
     output$tableSummaryMessage <- renderUI({

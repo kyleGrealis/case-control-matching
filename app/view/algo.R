@@ -14,28 +14,18 @@ box::use(
 #' @export
 server <- function(id, newFile, inputs) {
   moduleServer(id, function(input, output, session) {
-    # Create a reactive value for results
-    results <- reactiveVal()
-
-    # Create a reactive value to track if the button has been pressed
-    buttonClicked <- reactiveVal(FALSE)
 
     observeEvent(inputs()$matchButton, {
-      # If the button has not been clicked before
-      if (!isolate(buttonClicked())) {
-        results(
-          matching_algo$do_matching(
-            newFile,
-            inputs()$idVariable, inputs()$caseControl,
-            inputs()$numericVariable, inputs()$numRange,
-            inputs()$categoricalVariable, inputs()$ratio,
-            inputs()$thirdVariable
-          )
+      results(
+        matching_algo$do_matching(
+          newFile,
+          inputs()$idVariable, inputs()$caseControl,
+          inputs()$numericVariable, inputs()$numRange,
+          inputs()$categoricalVariable, inputs()$ratio,
+          inputs()$thirdVariable
         )
-        # Set the button as clicked
-        buttonClicked(TRUE)
-      }
-    })
+      )
+    }, once = TRUE)
 
     return(results)
   })

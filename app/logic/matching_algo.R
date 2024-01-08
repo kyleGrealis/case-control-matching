@@ -13,7 +13,7 @@ box::use(
   utils[head]
 )
 
-
+#' @export
 # build the function ------------------------------------------------------
 mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, ratio, thirdVar = NULL) {
   # Convert the variable names to symbols
@@ -24,6 +24,8 @@ mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, rati
   if (thirdVar != "blank") {
     thirdVar <- rlang::sym(thirdVar)
   }
+
+  dat <- dat()
 
   # Split the data into cases and controls
   if (thirdVar != "blank") {
@@ -159,12 +161,7 @@ mitter_match <- function(dat, idVar, caseControl, numVar, numRange, catVar, rati
 
   } # end of find_matches()
 
-  # Apply the function & calculate computation time
-  start_time <- proc.time()
   matched_data <- case$case_id |> map_dfr(find_matches)
-  end_time <- proc.time()
-  comp_time <- end_time - start_time
-
   return(matched_data)
 }
 

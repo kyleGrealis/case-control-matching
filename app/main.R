@@ -1,5 +1,6 @@
 box::use(
-  bslib[bs_theme, nav_item, nav_menu, nav_panel, nav_spacer, navset_card_tab,
+  bslib[bs_theme, card, card_body,
+        nav_item, nav_menu, nav_panel, nav_spacer, navset_card_tab,
         page_fillable],
   shiny[a, div, icon, mainPanel, moduleServer, NS, sidebarLayout, sidebarPanel,
         tags,],
@@ -64,6 +65,11 @@ ui <- function(id) {
                   unmatched_results$ui(ns("controls"))
                 )
               ), # navset_card_tab
+              card(
+                # card_body("words"),
+                card_body(algo$ui(ns("algo"))),
+                min_height = "100px"
+              )
             ), # nav_panel
             nav_spacer(),
             nav_menu(

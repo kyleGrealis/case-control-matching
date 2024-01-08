@@ -65,11 +65,16 @@ server <- function(id, newFile, inputs, results, the_filter) {
       req(results())
       if (is.null(unmatched())) {
         return(NULL)
-      }
-      glue::glue(
-        "Displaying the first 20 rows of {how_many()} total
+      } else if (how_many() <  20) {
+        glue::glue(
+          "Displaying all unsuccessfully matched {the_filter}."
+        )
+      } else {
+        glue::glue(
+          "Displaying the first 20 rows of {how_many()} total
         unsuccessfully matched {the_filter}."
-      )
+        )
+      }
     })
 
     # render the table output

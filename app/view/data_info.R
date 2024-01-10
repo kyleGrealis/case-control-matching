@@ -3,8 +3,8 @@
 box::use(
   dplyr[across, mutate, where],
   glue[glue],
-  shiny[moduleServer, NS, renderUI, tagList, uiOutput],
   reactable[reactable, reactableOutput, renderReactable],
+  shiny[moduleServer, NS, renderUI, tagList, uiOutput],
 )
 
 box::use(

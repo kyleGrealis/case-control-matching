@@ -1,11 +1,11 @@
 #' @concept This script will display information about the selected dataset.
 
 box::use(
+  bslib[tooltip],
   dplyr[across, mutate, where],
   glue[glue],
-  shiny[moduleServer, NS, renderTable, renderUI, tableOutput, tagList, uiOutput,
-        withProgress],
-  utils[head]
+  shiny[moduleServer, NS, renderUI, tagList, uiOutput],
+  reactable[reactable, reactableOutput, renderReactable],
 )
 
 box::use(
@@ -17,8 +17,7 @@ ui <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("tableSummaryMessage")),
-    tableOutput(ns("contents")),
-    uiOutput(ns("tableFootnote"))
+    reactableOutput(ns("contents"))
   )
 }
 
@@ -26,22 +25,15 @@ ui <- function(id) {
 server <- function(id, newFile) {
   moduleServer(id, function(input, output, server) {
 
-    output$contents <- renderTable({
+    output$contents <- renderReactable({
       if (is.null(newFile())) {
         return(NULL)
       }
 
-      # withProgress(
-      #   message = "Uploading data", {
-      #     # Create pause to see message
-      #     Sys.sleep(2)
-
-          # Apply the formatting to the numeric columns and display head
-          df <- newFile() |>
-            mutate(across(where(is.numeric), format_numbers)) |>
-            head(20)
-      #   }
-      # )
+      # Apply the formatting to the numeric columns and create reactable
+      newFile() |>
+        mutate(across(where(is.numeric), format_numbers)) |>
+        reactable()
     })
 
     output$tableSummaryMessage <- renderUI({
@@ -51,16 +43,11 @@ server <- function(id, newFile) {
       glue::glue(
         "The dataset contains {nrow(newFile())} participants
         and {ncol(newFile())} variable columns."
-      )
-    })
-
-    output$tableFootnote <- renderUI({
-      if (is.null(newFile())) {
-        return(NULL)
-      }
-      glue::glue(
-        "Displaying the first 20 participants."
-      )
+      ) |>
+        tooltip(
+          "Sort the table by clicking on the variable names.",
+          placement = "top"
+        )
     })
 
   })

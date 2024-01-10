@@ -4,7 +4,7 @@ box::use(
   dplyr[across, mutate, where],
   glue[glue],
   reactable[reactable, reactableOutput, renderReactable],
-  shiny[moduleServer, NS, renderUI, tagList, uiOutput],
+  shiny[moduleServer, NS, renderText, tagList, uiOutput],
 )
 
 box::use(
@@ -24,6 +24,17 @@ ui <- function(id) {
 server <- function(id, newFile) {
   moduleServer(id, function(input, output, server) {
 
+    output$tableSummaryMessage <- renderText({
+      if (is.null(newFile())) {
+        return(NULL)
+      }
+      glue::glue(
+        "The dataset contains {nrow(newFile())} participants
+        and {ncol(newFile())} variable columns."
+      ) |>
+        my_tooltip()
+    })
+
     output$contents <- renderReactable({
       if (is.null(newFile())) {
         return(NULL)
@@ -33,17 +44,6 @@ server <- function(id, newFile) {
       newFile() |>
         mutate(across(where(is.numeric), format_numbers)) |>
         reactable()
-    })
-
-    output$tableSummaryMessage <- renderUI({
-      if (is.null(newFile())) {
-        return(NULL)
-      }
-      glue::glue(
-        "The dataset contains {nrow(newFile())} participants
-        and {ncol(newFile())} variable columns."
-      ) |>
-        my_tooltip()
     })
 
   })

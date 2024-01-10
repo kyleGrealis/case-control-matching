@@ -8,3 +8,11 @@ format_numbers <- function(x) {
   }
 }
 
+# custom hover tooltip
+box::use(
+  bslib[tooltip],
+)
+
+my_tooltip <- function(x) {
+  tooltip(x, "Sort the table by clicking the variable names.", placement = "top")
+}

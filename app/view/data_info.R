@@ -1,7 +1,6 @@
 #' @concept This script will display information about the selected dataset.
 
 box::use(
-  bslib[tooltip],
   dplyr[across, mutate, where],
   glue[glue],
   shiny[moduleServer, NS, renderUI, tagList, uiOutput],
@@ -9,7 +8,7 @@ box::use(
 )
 
 box::use(
-  app/logic/functions[format_numbers]
+  app/logic/functions[format_numbers, my_tooltip],
 )
 
 #' @export
@@ -44,10 +43,7 @@ server <- function(id, newFile) {
         "The dataset contains {nrow(newFile())} participants
         and {ncol(newFile())} variable columns."
       ) |>
-        tooltip(
-          "Sort the table by clicking on the variable names.",
-          placement = "top"
-        )
+        my_tooltip()
     })
 
   })

@@ -13,6 +13,6 @@ box::use(
   bslib[tooltip],
 )
 
-my_tooltip <- function(x) {
-  tooltip(x, "Sort the table by clicking the variable names.", placement = "top")
+my_tooltip <- function(...) {
+  tooltip(..., "Sort the table by clicking the variable names.", placement = "top")
 }

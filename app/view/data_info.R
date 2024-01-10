@@ -4,8 +4,10 @@ box::use(
   dplyr[across, mutate, where],
   glue[glue],
   reactable[reactable, reactableOutput, renderReactable],
-  shiny[moduleServer, NS, renderText, tagList, uiOutput],
+  shiny[moduleServer, NS, renderUI, tagList, uiOutput],
 )
+
+# MUST use renderUI & uiOutput in order to use the tooltip with glue!
 
 box::use(
   app/logic/functions[format_numbers, my_tooltip],
@@ -24,7 +26,7 @@ ui <- function(id) {
 server <- function(id, newFile) {
   moduleServer(id, function(input, output, server) {
 
-    output$tableSummaryMessage <- renderText({
+    output$tableSummaryMessage <- renderUI({
       if (is.null(newFile())) {
         return(NULL)
       }

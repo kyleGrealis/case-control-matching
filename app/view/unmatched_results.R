@@ -7,8 +7,10 @@ box::use(
   dplyr[across, filter, mutate, select, where],
   glue[glue],
   reactable[reactable, reactableOutput, renderReactable],
-  shiny[moduleServer, NS, reactive, renderText, req, tagList, textOutput],
+  shiny[moduleServer, NS, reactive, renderUI, req, tagList, uiOutput],
 )
+
+# MUST use renderUI & uiOutput in order to use the tooltip with glue!
 
 box::use(
   app/logic/functions[format_numbers, my_tooltip],
@@ -18,7 +20,7 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    textOutput(ns("instructions")),
+    uiOutput(ns("instructions")),
     reactableOutput(ns("unmatched"))
   )
 }
@@ -60,7 +62,7 @@ server <- function(id, newFile, inputs, results, the_filter) {
     })
 
     # render the text output
-    output$instructions <- renderText({
+    output$instructions <- renderUI({
       req(results())
       if (is.null(unmatched())) {
         return(NULL)

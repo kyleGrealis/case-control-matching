@@ -6,13 +6,12 @@
 box::use(
   dplyr[across, mutate, where],
   glue[glue],
-  shiny[moduleServer, NS, renderTable, req, tableOutput, tagList,
-        renderText, textOutput],
-  utils[head]
+  reactable[reactable, reactableOutput, renderReactable],
+  shiny[moduleServer, NS, req, tagList, renderText, textOutput],
 )
 
 box::use(
-  app/logic/functions[format_numbers],
+  app/logic/functions[format_numbers, my_tooltip],
 )
 
 #' @export
@@ -20,7 +19,7 @@ ui <- function(id) {
   ns <- NS(id)
   tagList(
     textOutput(ns("instructions")),
-    tableOutput(ns("matched"))
+    reactableOutput(ns("matched"))
   )
 }
 
@@ -34,18 +33,19 @@ server <- function(id, results) {
         return(NULL)
       }
       glue::glue(
-        "Displaying the first 20 rows of {nrow(results())} successful matches."
-      )
+        "There are {nrow(results())} successful matches."
+      ) |>
+        my_tooltip()
     })
 
-    output$matched <- renderTable({
+    output$matched <- renderReactable({
       req(results())
       if (is.null(results())) {
         return(NULL)
       }
       results() |>
         mutate(across(where(is.numeric), format_numbers)) |>
-        head(20)
+        reactable()
     })
 
   })

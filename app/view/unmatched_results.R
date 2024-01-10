@@ -6,13 +6,12 @@
 box::use(
   dplyr[across, filter, mutate, select, where],
   glue[glue],
-  shiny[moduleServer, NS, reactive, renderTable, renderText, req,
-        tableOutput, tagList, textOutput],
-  utils[head]
+  reactable[reactable, reactableOutput, renderReactable],
+  shiny[moduleServer, NS, reactive, renderText, req, tagList, textOutput],
 )
 
 box::use(
-  app/logic/functions[format_numbers],
+  app/logic/functions[format_numbers, my_tooltip],
 )
 
 #' @export
@@ -20,7 +19,7 @@ ui <- function(id) {
   ns <- NS(id)
   tagList(
     textOutput(ns("instructions")),
-    tableOutput(ns("unmatched"))
+    reactableOutput(ns("unmatched"))
   )
 }
 
@@ -65,26 +64,22 @@ server <- function(id, newFile, inputs, results, the_filter) {
       req(results())
       if (is.null(unmatched())) {
         return(NULL)
-      } else if (how_many() <  20) {
-        glue::glue(
-          "Displaying all unsuccessfully matched {the_filter}."
-        )
       } else {
         glue::glue(
-          "Displaying the first 20 rows of {how_many()} total
-        unsuccessfully matched {the_filter}."
-        )
+          "Displaying unmatched {the_filter}."
+        ) |>
+          my_tooltip()
       }
     })
 
     # render the table output
-    output$unmatched <- renderTable({
+    output$unmatched <- renderReactable({
       req(results())
       if (is.null(unmatched())) {
         return(NULL)
       }
       unmatched() |>
-        head(20)
+        reactable()
     })
 
   })

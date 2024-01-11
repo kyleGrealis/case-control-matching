@@ -8,10 +8,10 @@ box::use(
   glue[glue],
   purrr[map_dfr],
   rlang[sym],
-  shiny[isolate, moduleServer, NS, observeEvent,
-        Progress, reactive,
-        reactiveVal, reactiveValues,
-        renderText, req, showNotification, tagList, verbatimTextOutput],
+  shiny[isolate, moduleServer, NS, observeEvent, reactive,
+        reactiveVal, reactiveValues, renderText, req, showNotification,
+        tagList, verbatimTextOutput,
+        incProgress, withProgress],
   utils[head],
 )
 
@@ -57,15 +57,6 @@ server <- function(id, newFile, inputs) {
     # the progress indicator is updated before and within the for loop
     observeEvent(inputs()$matchButton, {
 
-      # This is setting up the user notification for the matching progress
-      # adapting this from ?shiny::Progress example
-      progress <- Progress$new(session, min = 0, max = iterations)
-      on.exit(progress$close)
-      progress$set(
-        message = "Finding the best possible case-control matches",
-        detail  = "Thank you for your patience..."
-      )
-
       # this sets the message that will let the user know how the results came
       # to be presented that way
       rv$data <- paste(
@@ -82,65 +73,76 @@ server <- function(id, newFile, inputs) {
       # start computation timer
       start_time <- proc.time()
 
-      # matching loop
-      for(i in 1:iterations) {
+      # creating the progress notification. this must be wrapped around
+      # the matching algorithm so that the progress bar and message is
+      # properly updated and displayed.
+      withProgress(
+        message = "Finding the best possible case-control matches. Thank you for your patience...",
+        style = "notification",
+        detail = "Iteration 1",
+        min = 0, max = iterations+1,
+        value = 1, {
+          # matching loop
+          for(i in 1:iterations) {
 
-        # get the results of the best iteration
-        if (!is.null(best_matched_data())) {
-          best_match_results <- best_matched_data() |>
-            summarize(
-              n_cases = n_distinct(case_id),
-              n_controls = n_distinct(control_id)
+            # get the results of the best iteration
+            if (!is.null(best_matched_data())) {
+              best_match_results <- best_matched_data() |>
+                summarize(
+                  n_cases = n_distinct(case_id),
+                  n_controls = n_distinct(control_id)
+                )
+            }
+
+            # run the matching algorithm
+            matched_data <- matching_algo$mitter_match(
+              newFile,
+              inputs()$idVariable, inputs()$caseControl,
+              inputs()$numericVariable, inputs()$numRange,
+              inputs()$categoricalVariable, inputs()$ratio,
+              inputs()$thirdVariable
             )
-        }
 
-        # run the matching algorithm
-        matched_data <- matching_algo$mitter_match(
-          newFile,
-          inputs()$idVariable, inputs()$caseControl,
-          inputs()$numericVariable, inputs()$numRange,
-          inputs()$categoricalVariable, inputs()$ratio,
-          inputs()$thirdVariable
-        )
+            # increment the progress bar
+            if (i < iterations) {
+              incProgress(1, detail = glue::glue("Iteration {i+1}"))
+            } else {
+              incProgress(1, detail = "Finished!")
+            }
 
-        # count the number of unique cases and controls
-        match_results <- matched_data |>
-          summarize(
-            n_cases = n_distinct(case_id),
-            n_controls = n_distinct(control_id)
-          )
+            # count the number of unique cases and controls
+            match_results <- matched_data |>
+              summarize(
+                n_cases = n_distinct(case_id),
+                n_controls = n_distinct(control_id)
+              )
 
-        # update feedback to the user
-        rv$data <- paste(
-          rv$data, glue::glue(
-            "\nIteration {i} matched {nrow(matched_data)} controls to {match_results$n_cases} cases.\n------------------------------------------------------"
-          ), sep = "\n"
-        )
+            # update feedback to the user
+            rv$data <- paste(
+              rv$data, glue::glue(
+                "\nIteration {i} matched {nrow(matched_data)} controls to {match_results$n_cases} cases.\n------------------------------------------------------"
+              ), sep = "\n"
+            )
 
-        # compare the results to the best results
-        if (is.null(best_matched_data())) {
-          best_matched_data(matched_data)
-        } else {
-          if (match_results$n_cases > best_match_results$n_cases) {
-            best_matched_data(matched_data)
-          } else if (match_results$n_cases == best_match_results$n_cases &&
-                     nrow(matched_data) > nrow(best_matched_data())) {
-            best_matched_data(matched_data)
+            # compare the results to the best results
+            if (is.null(best_matched_data())) {
+              best_matched_data(matched_data)
+            } else {
+              if (match_results$n_cases > best_match_results$n_cases) {
+                best_matched_data(matched_data)
+              } else if (match_results$n_cases == best_match_results$n_cases &&
+                         nrow(matched_data) > nrow(best_matched_data())) {
+                best_matched_data(matched_data)
+              }
+            }
+
           }
         }
-
-        # using the shiny::Progress, set the incremental value based on loop index
-        # if this is placed higher in the loop sequence, the indicator bar appears
-        # to be full before the final matching algorithm is actually ran
-        # moved here because it looked weird above
-        progress$set(value = i)
-
-      }
+      )
 
       # end of computation time
       end_time <- proc.time()
       comp_time <- end_time - start_time
-      print(glue::glue("\n\nTotal matching time: {round(comp_time[3], 2)} seconds"))
       rv$data <- paste(
         rv$data, glue::glue(
           "\n\nTotal matching time: {round(comp_time[3], 2)} seconds"

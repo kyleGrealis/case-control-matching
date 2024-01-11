@@ -5,7 +5,6 @@
 
 box::use(
   bslib[tooltip],
-  glue[glue],
   rio[import],
   shiny[fileInput, moduleServer, NS, reactive],
 )

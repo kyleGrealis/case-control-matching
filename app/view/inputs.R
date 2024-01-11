@@ -2,17 +2,16 @@
 
 box::use(
   bslib[tooltip],
+  purrr[keep],
   shiny[actionButton, conditionalPanel, div, moduleServer, NS, numericInput,
         reactive, renderUI, selectInput, tagList, uiOutput],
-  shiny.fluent[Slider.shinyInput],
-  shinyjs[useShinyjs],
+  shiny.fluent[Slider.shinyInput]
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    useShinyjs(),
     uiOutput(ns("idVariable")),
     uiOutput(ns("caseControl")),
     uiOutput(ns("numericVariable")),
@@ -39,6 +38,10 @@ server <- function(id, newFile) {
         selected = ""
       )
     })
+
+    # NOTE: all conditionalPanels render once the previous selection
+    # evaluates to not being NULL or an empty string. this walks the user
+    # through the inputs and hopes to keep an interactive feel
 
     output$caseControl <- renderUI({
       if (is.null(newFile())) {

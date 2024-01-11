@@ -4,11 +4,13 @@
 #' while the unmatched cases & controls will go to their respective tabs.
 
 box::use(
+  bsicons[bs_icon],
   dplyr[across, filter, mutate, n_distinct, summarize, where],
   glue[glue],
   reactable[reactable, reactableOutput, renderReactable],
   rlang[sym],
-  shiny[moduleServer, NS, reactive, renderUI, req, tagList, uiOutput],
+  shiny[downloadButton, downloadHandler, moduleServer, NS, reactive, renderUI,
+        req, tagList, uiOutput],
 )
 
 # MUST use renderUI & uiOutput in order to use the tooltip with glue!
@@ -22,6 +24,7 @@ ui <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("instructions")),
+    uiOutput(ns("download")),
     reactableOutput(ns("matched"))
   )
 }
@@ -29,6 +32,7 @@ ui <- function(id) {
 #' @export
 server <- function(id, newFile, inputs, results) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
 
     # reusing this from the app/view/algo module to calculate the number of cases
     # find total number of cases in users dataset
@@ -62,6 +66,29 @@ server <- function(id, newFile, inputs, results) {
       ) |>
         my_tooltip()
     })
+
+    # this is for the download button
+    output$download <- renderUI({
+      req(results())
+      if (is.null(results())) {
+        return(NULL)
+      }
+      downloadButton(
+        ns("downloadData"),
+        "Download .csv",
+        icon = bsicons::bs_icon("download")
+      )
+    })
+
+    # this is for the actual downloaded file
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        glue::glue("Case-Control-matches-{Sys.Date()}.csv")
+      },
+      content = function(file) {
+        rio::export(data, file)
+      }
+    )
 
     output$matched <- renderReactable({
       req(results())

@@ -4,10 +4,12 @@
 #' while the unmatched cases & controls will go to their respective tabs.
 
 box::use(
+  bsicons[bs_icon],
   dplyr[across, filter, mutate, select, where],
   glue[glue],
   reactable[reactable, reactableOutput, renderReactable],
-  shiny[moduleServer, NS, reactive, renderUI, req, tagList, uiOutput],
+  shiny[downloadButton, downloadHandler, moduleServer, NS, reactive, renderUI,
+        req, tagList, uiOutput],
 )
 
 # MUST use renderUI & uiOutput in order to use the tooltip with glue!
@@ -21,6 +23,7 @@ ui <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("instructions")),
+    uiOutput(ns("download")),
     reactableOutput(ns("unmatched"))
   )
 }
@@ -28,6 +31,7 @@ ui <- function(id) {
 #' @export
 server <- function(id, newFile, inputs, results, the_filter) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
 
     # remove the unmatched cases/controls
     unmatched <- reactive({
@@ -73,6 +77,29 @@ server <- function(id, newFile, inputs, results, the_filter) {
           my_tooltip()
       }
     })
+
+    # this is for the download button
+    output$download <- renderUI({
+      req(results())
+      if (is.null(results())) {
+        return(NULL)
+      }
+      downloadButton(
+        ns("downloadData"),
+        "Download .csv",
+        icon = bsicons::bs_icon("download")
+      )
+    })
+
+    # this is for the actual downloaded file
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        glue::glue("unmatched-{the_filter}-{Sys.Date()}.csv")
+      },
+      content = function(file) {
+        rio::export(data, file)
+      }
+    )
 
     # render the table output
     output$unmatched <- renderReactable({

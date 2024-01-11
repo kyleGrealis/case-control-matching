@@ -9,7 +9,7 @@ box::use(
   glue[glue],
   reactable[reactable, reactableOutput, renderReactable],
   rlang[sym],
-  shiny[downloadButton, downloadHandler, moduleServer, NS, reactive, renderUI,
+  shiny[downloadButton, downloadHandler, div, moduleServer, NS, reactive, renderUI,
         req, tagList, uiOutput],
 )
 
@@ -23,8 +23,11 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    uiOutput(ns("instructions")),
-    uiOutput(ns("download")),
+    div(
+      style = "display: flex; justify-content: space-between;",
+      uiOutput(ns("instructions")),
+      uiOutput(ns("download"))
+    ),
     reactableOutput(ns("matched"))
   )
 }
@@ -75,18 +78,16 @@ server <- function(id, newFile, inputs, results) {
       }
       downloadButton(
         ns("downloadData"),
-        "Download .csv",
-        icon = bsicons::bs_icon("download")
+        # label = "csv"
+        label = NULL
       )
     })
 
     # this is for the actual downloaded file
     output$downloadData <- downloadHandler(
-      filename = function() {
-        glue::glue("Case-Control-matches-{Sys.Date()}.csv")
-      },
+      filename = glue::glue("Case-Control-matches-{Sys.Date()}.csv"),
       content = function(file) {
-        rio::export(data, file)
+        rio::export(results(), file)
       }
     )
 

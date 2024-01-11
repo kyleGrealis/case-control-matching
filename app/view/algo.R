@@ -8,8 +8,8 @@ box::use(
   glue[glue],
   purrr[map_dfr],
   rlang[sym],
-  shiny[incProgress, moduleServer, NS, observeEvent, reactive, reactiveVal,
-        renderText, req, tagList, textOutput, withProgress],
+  shiny[div, incProgress, moduleServer, NS, observeEvent, reactive, reactiveVal,
+        renderText, req, tagList, verbatimTextOutput, withProgress],
   utils[head],
 )
 
@@ -24,7 +24,10 @@ iterations <- 1
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    textOutput(ns("iteration_results"))
+    div(
+      verbatimTextOutput(ns("iteration_results")),
+      class = "console"
+    )
   )
 }
 
@@ -61,7 +64,7 @@ server <- function(id, newFile, inputs) {
       user_output(glue::glue(
           "The algorithm retains the iteration that produces the greatest number of matched cases.
           There are {total_cases()} total cases in the uploaded dataset.
-          ------------------------------------------------------\n"
+          ------------------------------------------------------"
       ))
 
       # the initial value is NULL since the loop hasn't started yet
@@ -141,8 +144,7 @@ server <- function(id, newFile, inputs) {
       end_time <- proc.time()
       comp_time <- end_time - start_time
       user_output(glue::glue(
-          "{user_output()}
-          \n\n
+          "{user_output()}\n
           Total matching time: {round(comp_time[3], 2)} seconds"
       ))
 

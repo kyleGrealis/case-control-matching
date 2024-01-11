@@ -8,10 +8,8 @@ box::use(
   glue[glue],
   purrr[map_dfr],
   rlang[sym],
-  shiny[isolate, moduleServer, NS, observeEvent, reactive,
-        reactiveVal, reactiveValues, renderText, req, showNotification,
-        tagList, verbatimTextOutput,
-        incProgress, withProgress],
+  shiny[incProgress, moduleServer, NS, observeEvent, reactive, reactiveVal,
+        reactiveValues, renderText, req, tagList, textOutput, withProgress],
   utils[head],
 )
 
@@ -26,7 +24,7 @@ iterations <- 3
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    verbatimTextOutput(ns("iteration_results"))
+    textOutput(ns("iteration_results"))
   )
 }
 

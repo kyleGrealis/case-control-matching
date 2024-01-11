@@ -41,6 +41,11 @@ ui <- function(id) {
         mainPanel(
           navset_card_tab(
             nav_panel(
+              id = "instructions",
+              "How to",
+              "Welcome. This will soon have the how-to guide. Stay tuned!"
+            ),
+            nav_panel(
               id = "data",
               "Data",
               data_info$ui(ns("info"))

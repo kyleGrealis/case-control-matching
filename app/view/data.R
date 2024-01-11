@@ -4,6 +4,7 @@
 #' @example test_data.sas7bdat
 
 box::use(
+  bslib[tooltip],
   glue[glue],
   rio[import],
   shiny[fileInput, moduleServer, NS, reactive],
@@ -12,7 +13,11 @@ box::use(
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-  fileInput(ns("file1"), "Choose data to import.", accept = NULL)
+  fileInput(ns("file1"), "Choose data to import.", accept = NULL) |>
+    tooltip(
+      "Is the data coded 0=\"Control\" and 1=\"Case\"?",
+      placement = "top"
+    )
 }
 
 #' @export

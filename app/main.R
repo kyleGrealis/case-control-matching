@@ -66,9 +66,8 @@ ui <- function(id) {
                 )
               ), # navset_card_tab
               card(
-                # card_body("words"),
                 card_body(algo$ui(ns("algo"))),
-                min_height = "100px"
+                max_height = "10vh"
               )
             ), # nav_panel
             nav_spacer(),
@@ -95,7 +94,7 @@ server <- function(id) {
     inputs <- inputs$server("inputs", newFile)
     results <- algo$server("algo", newFile, inputs)
 
-    matched_results$server("matched", results)
+    matched_results$server("matched", newFile, inputs, results)
     unmatched_results$server("cases", newFile, inputs, results, "cases")
     unmatched_results$server("controls", newFile, inputs, results, "controls")
 

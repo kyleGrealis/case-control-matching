@@ -9,7 +9,7 @@ box::use(
   purrr[map_dfr],
   rlang[sym],
   shiny[incProgress, moduleServer, NS, observeEvent, reactive, reactiveVal,
-        reactiveValues, renderText, req, tagList, textOutput, withProgress],
+        renderText, req, tagList, textOutput, withProgress],
   utils[head],
 )
 
@@ -18,7 +18,7 @@ box::use(
 )
 
 # Set the number of iterations here so it's easier to possibly adjust later
-iterations <- 3
+iterations <- 1
 
 #' @export
 ui <- function(id) {
@@ -48,8 +48,9 @@ server <- function(id, newFile, inputs) {
     # the Results > Mached Data tab
     best_matched_data <- reactiveVal()
 
-    # for text output that will display the final tally of matches and cases
-    rv <- reactiveValues(data = "")
+    # set empty reactive value for the output that will be displayed below
+    # the table output
+    user_output <- reactiveVal()
 
     # this handles the main matching portion of the entire app
     # the progress indicator is updated before and within the for loop
@@ -57,13 +58,11 @@ server <- function(id, newFile, inputs) {
 
       # this sets the message that will let the user know how the results came
       # to be presented that way
-      rv$data <- paste(
-        rv$data, glue::glue(
+      user_output(glue::glue(
           "The algorithm retains the iteration that produces the greatest number of matched cases.
           There are {total_cases()} total cases in the uploaded dataset.
-          ------------------------------------------------------"
-        ), sep = "\n"
-      )
+          ------------------------------------------------------\n"
+      ))
 
       # the initial value is NULL since the loop hasn't started yet
       best_matched_data(NULL)
@@ -116,11 +115,11 @@ server <- function(id, newFile, inputs) {
               )
 
             # update feedback to the user
-            rv$data <- paste(
-              rv$data, glue::glue(
-                "\nIteration {i} matched {nrow(matched_data)} controls to {match_results$n_cases} cases.\n------------------------------------------------------"
-              ), sep = "\n"
-            )
+            user_output(glue::glue(
+                "{user_output()}
+                Iteration {i} matched {nrow(matched_data)} controls to {match_results$n_cases} cases.
+                ------------------------------------------------------"
+            ))
 
             # compare the results to the best results
             if (is.null(best_matched_data())) {
@@ -141,17 +140,17 @@ server <- function(id, newFile, inputs) {
       # end of computation time
       end_time <- proc.time()
       comp_time <- end_time - start_time
-      rv$data <- paste(
-        rv$data, glue::glue(
-          "\n\nTotal matching time: {round(comp_time[3], 2)} seconds"
-        ), sep = "\n"
-      )
+      user_output(glue::glue(
+          "{user_output()}
+          \n\n
+          Total matching time: {round(comp_time[3], 2)} seconds"
+      ))
 
     }, once = TRUE)
 
     # return the feedback to the user under the matching results
     output$iteration_results <- renderText({
-      rv$data
+      user_output()
     })
 
     return(best_matched_data)

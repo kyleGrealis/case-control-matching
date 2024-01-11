@@ -1,9 +1,9 @@
 box::use(
-  bslib[bs_theme, card, card_body,
-        nav_item, nav_menu, nav_panel, nav_spacer, navset_card_tab,
-        page_fillable],
+  bslib[bs_theme, card, card_body, nav_item, nav_menu, nav_panel, nav_spacer,
+        navset_card_tab, nav_select, page_fillable],
   shiny[a, div, icon, mainPanel, moduleServer, NS, sidebarLayout, sidebarPanel,
-        tags,],
+        tags, observe, reactiveVal],
+  shinyjs[useShinyjs],
 )
 
 box::use(
@@ -29,7 +29,7 @@ link_posit <- tags$a(
 ui <- function(id) {
   ns <- NS(id)
   page_fillable(
-    # set default bootstrap version
+    useShinyjs(),
     theme = bs_theme(version = 5),
     style = "margin: auto; max-width: 1500px;",
     div(
@@ -40,18 +40,16 @@ ui <- function(id) {
         ),
         mainPanel(
           navset_card_tab(
+            id = ns("main_tabset"),
             nav_panel(
-              id = "instructions",
               "How to",
               "Welcome. This will soon have the how-to guide. Stay tuned!"
             ),
             nav_panel(
-              id = "data",
               "Data",
               data_info$ui(ns("info"))
             ),
             nav_panel(
-              id = "results",
               "Results",
               navset_card_tab(
                 nav_panel(
@@ -94,11 +92,41 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # create an empty reactive value. this will be used to conditionally
+    # change the focus to the "data" tab
+    fileData <- reactiveVal()
     newFile <- data$server("data_file")
+
+    # if the reactiveVal for the fileData has something in it, change to the
+    # "data" tab automatically
+    observe({
+      fileData(newFile())
+      if (!is.null(fileData())) {
+        nav_select(id = "main_tabset", selected = "Data")
+      }
+    })
+
+    # present the data information (number of rows & colums)
     data_info$server("info", newFile)
+
+    # render the inputs and collect their values as a list of reactives
     inputs <- inputs$server("inputs", newFile)
+
+    # create an empty reactive value. this will be used to conditionally
+    # change the focus to the "results" tab
+    finishedMatching <- reactiveVal()
     results <- algo$server("algo", newFile, inputs)
 
+    # if the reactiveVal for the finishedMatching has something in it, change
+    # to the "results" tab automatically
+    observe({
+      finishedMatching(results())
+      if (!is.null(finishedMatching())) {
+        nav_select(id = "main_tabset", selected = "Results")
+      }
+    })
+
+    # present the matched and unsuccessful matches
     matched_results$server("matched", newFile, inputs, results)
     unmatched_results$server("cases", newFile, inputs, results, "cases")
     unmatched_results$server("controls", newFile, inputs, results, "controls")

@@ -1,12 +1,11 @@
 #' @concept Displaying sidebar user inputs to strategize the case-control matching. This will be a collection of conditionalPanels, selectInputs, and a numericInput. The available options will be updated as the user navigates through available variables.
 
 box::use(
-  bsicons[bs_icon],
   bslib[tooltip],
-  shiny[actionButton, conditionalPanel, fileInput, isolate, moduleServer, NS,
-        numericInput, reactive, reactiveVal, renderText, renderUI, selectInput,
-        span, tagList, uiOutput, observeEvent],
-  shinyjs[disable, useShinyjs],
+  shiny[actionButton, conditionalPanel, div, moduleServer, NS, numericInput,
+        reactive, renderUI, selectInput, tagList, uiOutput],
+  shiny.fluent[Slider.shinyInput],
+  shinyjs[useShinyjs],
 )
 
 #' @export
@@ -35,7 +34,7 @@ server <- function(id, newFile) {
         return(NULL)
       }
       selectInput(
-        ns("idVariable"), "Choose ID variable.",
+        ns("idVariable"), "Participant ID variable",
         choices = c("", names(newFile())),
         selected = ""
       )
@@ -50,7 +49,7 @@ server <- function(id, newFile) {
         condition = "input.idVariable !== ''",
         selectInput(
           ns("caseControl"),
-          span("Choose case-control variable.", bs_icon("info-circle-fill")),
+          "Case-control variable",
           choices = c(
             "",
             setdiff(
@@ -58,11 +57,8 @@ server <- function(id, newFile) {
               c(input$idVariable)
             ) # setdiff
           ) # choices
-        ) |> # selectInput
-          tooltip(
-            "Be sure that this is coded where 0=\"Control\" and 1=\"Case\"",
-            placement = "top"
-          )
+        ), # selectInput
+        style = "display: none;"
       ) # conditionalPanel
     })
 
@@ -74,7 +70,7 @@ server <- function(id, newFile) {
         ns = ns,
         condition = "input.caseControl !== ''",
         selectInput(
-          ns("numericVariable"), "Choose numeric matching variable.",
+          ns("numericVariable"), "Numeric variable",
           choices = c(
             "",
             setdiff(
@@ -85,7 +81,8 @@ server <- function(id, newFile) {
               )
             ) # setdiff
           ) # choices
-        ) # selectInput
+        ), # selectInput
+        style = "display: none;"
       ) # conditionalPanel
     })
 
@@ -98,18 +95,16 @@ server <- function(id, newFile) {
         condition = "input.numericVariable !== ''",
         numericInput(
           ns("numRange"),
-          span(
-            "Choose matching range of numeric variable.",
-            bs_icon("info-circle-fill")
-          ),
+          "Numeric variable matching tolerance",
           min = 0, max = 100, step = 1, value = NA
         ) |>
         tooltip(
-          "A value of \"0\" will perform exact matching (example: the case &
-          control(s) are the same age). A value of \"1\" will perform matching
-          based on a range (case age 40 and eligible controls aged 39-41).",
+          "A value of \"0\" matches cases & controls having the same numeric
+          value. A value of \"5\" will perform matching based on a range
+          (case age=40, eligible controls aged 35-45).",
           placement = "top"
-        )
+        ),
+        style = "display: none;"
       ) # conditionalPanel
     })
 
@@ -121,7 +116,7 @@ server <- function(id, newFile) {
         ns = ns,
         condition = "input.numRange !== null",
         selectInput(
-          ns("categoricalVariable"), "Choose categorical matching variable.",
+          ns("categoricalVariable"), "Categorical variable",
           choices = c(
             "",
             setdiff(
@@ -133,7 +128,8 @@ server <- function(id, newFile) {
               )
             ) # setdiff
           ) # choices
-        ) # selectInput
+        ), # selectInput
+        style = "display: none;"
       ) # conditionalPanel
     })
 
@@ -144,20 +140,12 @@ server <- function(id, newFile) {
       conditionalPanel(
         ns = ns,
         condition = "input.categoricalVariable !== ''",
-        numericInput(
+        "Controls-to-case ratio",
+        Slider.shinyInput(
           ns("ratio"),
-          span(
-            "Choose matching ratio.",
-            bs_icon("info-circle-fill")
-          ),
-          min = 1, max = 10, step = 1, value = NA
-        ) |>
-        tooltip(
-          "A value of \"1\" will attempt 1:1 matching (one case is
-          matched to one control). A value of \"2\" will perform 1:2 matching
-          (matching one case to two controls).",
-          placement = "top"
-        )
+          min = 1, max = 5, step = 1, value = 2
+        ),
+        style = "display: none;"
       ) # conditionalPanel
     })
 
@@ -167,9 +155,9 @@ server <- function(id, newFile) {
       }
       conditionalPanel(
         ns = ns,
-        condition = "input.ratio !== null",
+        condition = "input.categoricalVariable !== ''",
         selectInput(
-          ns("thirdVariable"), "Choose categorical matching variable.",
+          ns("thirdVariable"), "Second categorical variable",
           choices = c(
             "leave blank if not needed" = "blank",
             setdiff(
@@ -182,7 +170,8 @@ server <- function(id, newFile) {
               )
             ) # setdiff
           ) # choices
-        ) # selectInput
+        ), # selectInput
+        style = "display: none;"
       ) # conditionalPanel
     })
 
@@ -192,8 +181,9 @@ server <- function(id, newFile) {
       }
       conditionalPanel(
         ns = ns,
-        condition = "input.ratio !== null",
-        actionButton(ns("matchButton"), "Match!")
+        condition = "input.categoricalVariable !== ''",
+        actionButton(ns("matchButton"), "Match!"),
+        style = "display: none;"
       )
     })
 

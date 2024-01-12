@@ -1,8 +1,8 @@
 box::use(
   bslib[bs_theme, card, card_body, nav_item, nav_menu, nav_panel, nav_spacer,
         navset_card_tab, nav_select, page_fillable],
-  shiny[a, div, icon, mainPanel, moduleServer, NS, sidebarLayout, sidebarPanel,
-        tags, observe, reactiveVal, titlePanel],
+  shiny[a, addResourcePath, div, icon, includeHTML, mainPanel, moduleServer, NS,
+        sidebarLayout, sidebarPanel, tags, observe, reactiveVal, titlePanel],
   shinyjs[useShinyjs],
 )
 
@@ -25,6 +25,8 @@ link_posit <- tags$a(
   href = "https://posit.co", target = "_blank"
 )
 
+addResourcePath("how-to", "app/static/how-to")
+
 #' @export
 ui <- function(id) {
   ns <- NS(id)
@@ -46,7 +48,10 @@ ui <- function(id) {
             id = ns("main-tabset"),
             nav_panel(
               "How to",
-              "Welcome. This will soon have the how-to guide. Stay tuned!"
+              tags$iframe(
+                src = "how-to/case-control-how-to.html",
+                width = "100%", height = "700px"
+              )
             ),
             nav_panel(
               "Data",

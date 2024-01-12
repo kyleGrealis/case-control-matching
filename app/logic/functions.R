@@ -16,7 +16,3 @@ box::use(
 my_tooltip <- function(...) {
   tooltip(..., "Sort the table by clicking the variable names.", placement = "top")
 }
-
-my_card <- function(...) {
-  card(..., class = "my_card")
-}

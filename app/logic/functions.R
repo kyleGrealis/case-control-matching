@@ -10,9 +10,13 @@ format_numbers <- function(x) {
 
 # custom hover tooltip
 box::use(
-  bslib[tooltip],
+  bslib[card, tooltip],
 )
 
 my_tooltip <- function(...) {
   tooltip(..., "Sort the table by clicking the variable names.", placement = "top")
+}
+
+my_card <- function(...) {
+  card(..., class = "my_card")
 }

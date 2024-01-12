@@ -1,0 +1,139 @@
+---
+format: 
+  html:
+    page-layout: full
+    self-contained: true
+---
+# How to use EpiMatch
+
+## Introduction
+This is a web app that allows you to match cases to controls based on a set of variables. It is designed to be used with a wide variety data types and relies on the <a href="https://cran.r-project.org/web/packages/rio/readme/README.html#supported-file-formats" target="_blank">`rio::import()`</a> function in R. Trust me... I'm pretty sure your data is supported.
+
+## Uploading Data
+
+::: {.callout-note}
+Prior to uploading your data, be sure that you have a variable that identifies cases and controls. This variable should be coded as 1 for cases and 0 for controls.
+:::
+
+:::: columns
+
+::: {.column width="40%"}
+![Figure 1: Uploading your data](data-upload.png)
+:::
+
+::: {.column width="60%"}
+
+<br>
+Select the `Browse` button to your left then select the file you would like to use for the matching process. Once you have selected your file, you can view the first 15 rows of your data or use any of the variable headers to sort your data. You may also change pages to view more of your data. The tables in this app are completely interactive.
+:::
+
+::::
+
+## Selecting Variables
+
+Choosing your variables is quite easy: follow the guided process to identify:
+
+:::: columns
+
+::: {.column width="60%"}
+
+1. the variable identifying your participants. This can be a string (e.g., a name or alphanumeric code) or a numeric variable.
+
+2. the variable identifying cases and controls. Remember, this variable should be coded as 1 for cases and 0 for controls.
+
+3. the `Numeric variable` can be any numeric variable (e.g., age, income, etc.)
+
+4. the `Numeric variable matching tolerance` is used to set a matching range for the `Numeric variable`. For example, if you set the `Numeric variable matching tolerance` to 5 and the `Numeric variable` is age, then the app will match controls that are ±5 units of the `Numeric variable`. Following this example, if the `Numeric variable` is age and the `Numeric variable matching tolerance` is 5, then a case that is 25 years old will be matched to controls that are between 20 and 30 years old.
+
+5. the `Categorical variable` will include any remaining non-numeric, string variables. One exception is if your categorical variable consists of grouped numeric values entered as strings like "18-24" or "25-34".
+
+6. adjust the slider to choose how many controls will be matched to each case. Selecting 2 (as is the default) will match 2 controls to each case.
+
+7. choose a `Second categorical variable` if needed.
+
+8. click the `Match!` button to begin the matching process.
+:::
+
+::: {.column width="40%"}
+<br><br><br><br><br>
+![Figure 2: Entering the inputs](inputs-start.png)
+<br><br><br>
+![Figure 3: Complete inputs](inputs-full.png)
+:::
+
+::::
+
+## Matching
+
+<!-- :::: columns -->
+
+::: {.callout-warning}
+Warning: if you have a large dataset, the matching process may take a few minutes. You can view the progress by observing the progress bar and feedback in the lower right corner of the app.
+:::
+
+The matching process can be time intensive. If you have chosen to match more than 1 control to each case, the app will match the first control to each case, then the second control, and so on. The app will also match the controls to the cases in the order they appear in your data. This means that if you have sorted your data by a variable, the app will match the controls to the cases in that order. For example, if you have sorted your data by age, the app will match the controls to the cases in order of age. This is important to remember if you have chosen to match more than 1 control to each case. Also, matching on two categorical variables may increase the time it takes to match your data.
+
+![Figure 4: Matching progress](start-matching.png)
+
+
+## Results
+Once the matching process is complete, you will be presented with a table of your matched data. You can view the first 10 rows of your data or use any of the variable headers to sort your data. Again, the tables in this app are completely interactive.
+
+### Matched Data
+
+These are the main results of your matching process. The table will provide you with a row of each case matched to a control. If your matching ratio is greater than 1 (matching to 2 or more controls), each case will be listed as many times as successful cases were found. Use the icon in the upper right corner of the table to download your matched data as a `.csv` file.
+
+:::: columns
+
+::: {.column width="48%"}
+![Figure 5: Results](results-matched.png)
+:::
+
+::: {.column width="4%"}
+<!-- this is so there's a slight gap between the image & text -->
+:::
+
+::: {.column width="48%"}
+
+![Figure 6: Downloading matched data](matched-data.png)
+
+::: {.callout-important}
+Be advised: If your matching ratio is 2 or more but the algorithm was only able match that case to 1 control, the case will only be listed once! 
+:::
+
+:::
+
+::::
+
+### Unmatched Cases and Controls
+This table will provide you with a list of any cases or controls that were not matched successfully. This happens when there are no remaining eligible controls for a particular case, or if there are no remaining eligible cases for a particular control. Use the icon in the upper right corner of the table to download your unmatched data as a `.csv` file.
+
+
+:::: columns
+
+::: {.column width="55%"}
+### Details
+
+This section provides you with feedback of each matching iteration. It will tell you how many cases and how many controls were matched in each iteration. It will also provide you with feedback for how long the process took, just in case you were curious.
+
+:::
+
+::: {.column width="40%"}
+![Figure 7: Matching iteration details](results-details.png)
+:::
+
+::::
+
+::: {.callout-note}
+Note: The final dataset that you are presented with is based on the the iteration that producing the greatest number of matched **cases**. This means that some datasets may produce more rows of data if the matching ratio is 2 or greater, but it will also display the iteration prioritizing cases over controls. However, the decision to retain the dataset using the most cases seemed to be the most logical choice to aide in the next steps of the statistical analysis. If you have any suggestions, please let me know!
+:::
+
+## Your feedback
+First, thank you for choosing to use my app! I hope that you find it helpful and efficient to accomplish your task. If there are any suggestions you have or changes that would help improve this app, please let me know. You can contact me here on <a href="https://www.linkedin.com/in/kyle-grealis-044030180/" target="_blank">LinkedIn</a>.
+
+Feel free to check out my other apps and projects on my <a href="https://github.com/kyleGrealis" target="_blank">GitHub</a> page. There you'll find a link to a <a href="https://kylegrealis.shinyapps.io/category5" target="_blank">power calculator</a> and a few other projects I've been working on.
+
+<br><br>
+Thanks again and happy coding!
+
+Kyle

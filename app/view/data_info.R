@@ -45,7 +45,7 @@ server <- function(id, newFile) {
       # Apply the formatting to the numeric columns and create reactable
       newFile() |>
         mutate(across(where(is.numeric), format_numbers)) |>
-        reactable()
+        reactable(defaultPageSize = 15)
     })
 
   })

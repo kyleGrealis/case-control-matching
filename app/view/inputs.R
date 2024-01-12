@@ -3,8 +3,8 @@
 box::use(
   bslib[tooltip],
   purrr[keep],
-  shiny[actionButton, conditionalPanel, div, moduleServer, NS, numericInput,
-        reactive, renderUI, selectInput, tagList, uiOutput],
+  shiny[actionButton, column, conditionalPanel, div, moduleServer, NS,
+        numericInput, reactive, renderUI, selectInput, tagList, uiOutput],
   shiny.fluent[Slider.shinyInput]
 )
 
@@ -185,7 +185,11 @@ server <- function(id, newFile) {
       conditionalPanel(
         ns = ns,
         condition = "input.categoricalVariable !== ''",
-        actionButton(ns("matchButton"), "Match!"),
+        column(
+          actionButton(ns("matchButton"), "Match!"),
+          width = 12,
+          align = "center"
+        ),
         style = "display: none;"
       )
     })

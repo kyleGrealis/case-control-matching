@@ -35,19 +35,24 @@ ui <- function(id) {
     div(
       sidebarLayout(
         sidebarPanel(
+          id = "my-sidebar",
           data$ui(ns("data_file")),
           inputs$ui(ns("inputs"))
         ),
         mainPanel(
           navset_card_tab(
-            id = ns("main_tabset"),
+            # must be namespace'd or the observe() in the server will not
+            # change the tabs automatically
+            id = ns("main-tabset"),
             nav_panel(
               "How to",
               "Welcome. This will soon have the how-to guide. Stay tuned!"
             ),
             nav_panel(
               "Data",
-              data_info$ui(ns("info"))
+              card(
+                data_info$ui(ns("info"))
+              )
             ),
             nav_panel(
               "Results",
@@ -55,23 +60,32 @@ ui <- function(id) {
                 nav_panel(
                   id = "matched_data",
                   "Matched Data",
-                  matched_results$ui(ns("matched"))
+                  card(
+                    matched_results$ui(ns("matched"))
+                  )
                 ),
                 nav_panel(
                   id = "cases",
                   "Cases",
-                  unmatched_results$ui(ns("cases"))
+                  card(
+                    unmatched_results$ui(ns("cases"))
+                  )
                 ),
                 nav_panel(
                   id = "controls",
                   "Controls",
-                  unmatched_results$ui(ns("controls"))
+                  card(
+                    unmatched_results$ui(ns("controls"))
+                  )
+                ),
+                nav_panel(
+                  id = "details",
+                  "Details",
+                  card(
+                    algo$ui(ns("algo"))
+                  )
                 )
-              ), # navset_card_tab
-              card(
-                card_body(algo$ui(ns("algo"))),
-                max_height = "10vh"
-              )
+              ) # navset_card_tab
             ), # nav_panel
             nav_spacer(),
             nav_menu(
@@ -102,7 +116,7 @@ server <- function(id) {
     observe({
       fileData(newFile())
       if (!is.null(fileData())) {
-        nav_select(id = "main_tabset", selected = "Data")
+        nav_select(id = "main-tabset", selected = "Data")
       }
     })
 
@@ -122,7 +136,7 @@ server <- function(id) {
     observe({
       finishedMatching(results())
       if (!is.null(finishedMatching())) {
-        nav_select(id = "main_tabset", selected = "Results")
+        nav_select(id = "main-tabset", selected = "Results")
       }
     })
 

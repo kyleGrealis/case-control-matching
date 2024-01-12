@@ -12,7 +12,12 @@ box::use(
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-  fileInput(ns("file1"), "Choose data to import.", accept = NULL) |>
+  fileInput(
+    ns("file1"),
+    "Upload case-control data",
+    # accept all types
+    accept = NULL
+  ) |>
     tooltip(
       "Is the data coded 0=\"Control\" and 1=\"Case\"?",
       placement = "top"

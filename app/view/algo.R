@@ -18,16 +18,13 @@ box::use(
 )
 
 # Set the number of iterations here so it's easier to possibly adjust later
-iterations <- 1
+iterations <- 5
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    div(
-      verbatimTextOutput(ns("iteration_results")),
-      class = "console"
-    )
+    verbatimTextOutput(ns("iteration_results"))
   )
 }
 

@@ -1,4 +1,22 @@
-.my_card {
-  min-height: 50vh;
-  max-height: 70vh;
+#my-sidebar, #app-algo-iteration_results {
+  background-color: var(--bs-body-bg);
 }
+
+#my-sidebar {
+  box-shadow: var(--bs-box-shadow-sm);
+  border-radius: 8px;
+}
+
+.card-body {
+  height: 80vh !important;
+}
+
+.Reactable {
+  font-size: 0.85rem;
+}
+
+#app-algo-iteration_results {
+  font-family: "Open Sans";
+  border: none !important;
+}
+

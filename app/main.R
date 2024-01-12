@@ -2,7 +2,7 @@ box::use(
   bslib[bs_theme, card, card_body, nav_item, nav_menu, nav_panel, nav_spacer,
         navset_card_tab, nav_select, page_fillable],
   shiny[a, div, icon, mainPanel, moduleServer, NS, sidebarLayout, sidebarPanel,
-        tags, observe, reactiveVal],
+        tags, observe, reactiveVal, titlePanel],
   shinyjs[useShinyjs],
 )
 
@@ -32,6 +32,7 @@ ui <- function(id) {
     useShinyjs(),
     theme = bs_theme(version = 5),
     style = "margin: auto; max-width: 1500px;",
+    titlePanel("EpiMatch: case-control matching made easy"),
     div(
       sidebarLayout(
         sidebarPanel(

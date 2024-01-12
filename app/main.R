@@ -31,7 +31,6 @@ ui <- function(id) {
   page_fillable(
     useShinyjs(),
     theme = bs_theme(version = 5),
-    style = "margin: auto; max-width: 1500px;",
     titlePanel("EpiMatch: case-control matching made easy"),
     div(
       sidebarLayout(

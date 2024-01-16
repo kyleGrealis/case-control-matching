@@ -236,6 +236,13 @@
       ],
       "Hash": "ce8187a260e8e3abc2294284badc3b76"
     },
+    "brew": {
+      "Package": "brew",
+      "Version": "1.0-10",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "8f4a384e19dccd8c65356dc096847b76"
+    },
     "brio": {
       "Package": "brio",
       "Version": "1.1.4",
@@ -400,6 +407,13 @@
         "R"
       ],
       "Hash": "c089a619a7fae175d149d89164f8c7d8"
+    },
+    "collections": {
+      "Package": "collections",
+      "Version": "0.3.7",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "90a0eda114ab0bef170ddbf5ef0cd93f"
     },
     "colorspace": {
       "Package": "colorspace",
@@ -1029,6 +1043,30 @@
         "stats"
       ],
       "Hash": "b64ec208ac5bc1852b285f665d6368b3"
+    },
+    "languageserver": {
+      "Package": "languageserver",
+      "Version": "0.3.16",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "R6",
+        "callr",
+        "collections",
+        "fs",
+        "jsonlite",
+        "lintr",
+        "parallel",
+        "roxygen2",
+        "stringi",
+        "styler",
+        "tools",
+        "utils",
+        "xml2",
+        "xmlparsedata"
+      ],
+      "Hash": "f8901f44aedb6d7e7d03b5533986bd97"
     },
     "later": {
       "Package": "later",
@@ -1667,6 +1705,32 @@
         "yaml"
       ],
       "Hash": "d65e35823c817f09f4de424fcdfa812a"
+    },
+    "roxygen2": {
+      "Package": "roxygen2",
+      "Version": "7.3.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "R6",
+        "brew",
+        "cli",
+        "commonmark",
+        "cpp11",
+        "desc",
+        "knitr",
+        "methods",
+        "pkgload",
+        "purrr",
+        "rlang",
+        "stringi",
+        "stringr",
+        "utils",
+        "withr",
+        "xml2"
+      ],
+      "Hash": "31561c910b524c8313d8c26a692f8b9a"
     },
     "rpart": {
       "Package": "rpart",

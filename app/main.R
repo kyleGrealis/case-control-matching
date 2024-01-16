@@ -17,12 +17,12 @@ box::use(
 )
 
 link_shiny <- tags$a(
-  shiny::icon("github"), "Shiny",
-  href = "https://github.com/rstudio/shiny", target = "_blank"
+  shiny::icon("github"), "EpiMatch Repo",
+  href = "https://github.com/kyleGrealis/case-control-matching/", target = "_blank"
 )
 link_posit <- tags$a(
-  shiny::icon("r-project"), "Posit",
-  href = "https://posit.co", target = "_blank"
+  shiny::icon("bolt"), "Power Calculator",
+  href = "https://kylegrealis.shinyapps.io/category5", target = "_blank"
 )
 
 addResourcePath("how-to", "app/static/how-to")

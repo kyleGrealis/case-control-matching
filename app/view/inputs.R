@@ -186,7 +186,8 @@ server <- function(id, newFile) {
         ns = ns,
         condition = "input.categoricalVariable !== ''",
         column(
-          actionButton(ns("matchButton"), "Match!"),
+          actionButton(ns("matchButton"), "Match!") |>
+            tooltip("This only works once!", placement = "top"),
           width = 12,
           align = "center"
         ),

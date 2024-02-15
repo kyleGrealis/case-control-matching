@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.3.0",
+    "Version": "4.3.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -33,9 +33,9 @@
     },
     "MASS": {
       "Package": "MASS",
-      "Version": "7.3-58.4",
+      "Version": "7.3-60.0.1",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R",
         "grDevices",
@@ -44,7 +44,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "a3142b2a022b8174ca675bc8b80cdc4e"
+      "Hash": "b765b28387acc8ec9e9c1530713cb19c"
     },
     "Matrix": {
       "Package": "Matrix",
@@ -913,11 +913,11 @@
       "Version": "0.5.7.9000",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteUsername": "rstudio",
+      "RemoteHost": "api.github.com",
       "RemoteRepo": "htmltools",
+      "RemoteUsername": "rstudio",
       "RemoteRef": "HEAD",
       "RemoteSha": "7efa2d87adbfa8506347b84d78b2da0ba9705ad2",
-      "RemoteHost": "api.github.com",
       "Requirements": [
         "R",
         "base64enc",

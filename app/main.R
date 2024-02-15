@@ -20,9 +20,9 @@ link_shiny <- tags$a(
   shiny::icon("github"), "EpiMatch Repo",
   href = "https://github.com/kyleGrealis/case-control-matching/", target = "_blank"
 )
-link_posit <- tags$a(
-  shiny::icon("bolt"), "Power Calculator",
-  href = "https://kylegrealis.shinyapps.io/category5", target = "_blank"
+link_website <- tags$a(
+  shiny::icon("laptop"), "My webpage",
+  href = "https://kylegrealis.github.io/", target = "_blank"
 )
 
 addResourcePath("how-to", "app/static/how-to")
@@ -95,8 +95,8 @@ ui <- function(id) {
             nav_spacer(),
             nav_menu(
               title = "Links",
-              nav_item(link_shiny),
-              nav_item(link_posit)
+              nav_item(link_website),
+              nav_item(link_shiny)
             )
           ) # navset_card_tab
         ) # mainPanel

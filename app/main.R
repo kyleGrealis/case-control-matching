@@ -29,6 +29,25 @@ addResourcePath("how-to", "app/static/how-to")
 
 #' @export
 ui <- function(id) {
+
+  #-------------------------------------------------------------------------
+  # This was added 4/14/2025 from the example at:
+  # https://www.appsilon.com/post/r-shiny-google-analytics
+  shiny::tags$head(
+    # Google Analytics
+    shiny::HTML('
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LHWXKQHE0F"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag(\'js\', new Date());
+        gtag(\'config\', \'G-LHWXKQHE0F\');
+      </script>
+    ')
+  )
+  #-------------------------------------------------------------------------
+
   ns <- NS(id)
   page_fillable(
     useShinyjs(),
